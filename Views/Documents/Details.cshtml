@@ -1,0 +1,114 @@
+﻿@model WmsCore.Models.Document
+
+@{
+    ViewData["Title"] = "Details";
+    var supplier = (Supplier)ViewBag.Supplier;
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Dokument</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Type)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Type)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Date)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Date)
+        </dd>
+
+        @if(supplier != null){
+
+        <dt class="col-sm-2">
+                Nazwa
+        </dt>
+        <dd class="col-sm-10">
+            @ViewBag.Supplier.Name
+        </dd>
+
+            <dt class="col-sm-2">
+            Adres Dostawcy
+        </dt>
+            <dd class="col-sm-10">
+                Kod pocztowy - @ViewBag.Supplier.Address.PostalCode
+                Miasto - @ViewBag.Supplier.Address.City
+                Ulica - @ViewBag.Supplier.Address.Street
+            </dd>
+
+            <dt class="col-sm-2">
+                Email
+            </dt>
+            <dd class="col-sm-10">
+                @ViewBag.Supplier.Email)
+            </dd>
+        }
+        <dt class="col-sm-2">
+            Wartość dokumentu
+        </dt>
+        <dd class="col-sm-10">
+            @Model.DocumentInstruments.Sum(di => di.Instrument.Price * di.Quantity) 
+        </dd>
+
+    </dl>
+    
+    @if (Model.DocumentInstruments != null && Model.DocumentInstruments.Any())
+    {
+        var items = Model.DocumentInstruments.ToList();
+
+        <h4 class="mt-4 mb-3">Instrumenty w dokumencie</h4>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Nazwa instrumentu</th>
+                        <th>Kategoria</th>
+                        <th>Cena</th>
+                        <th style="width: 8rem;">Ilość</th>
+                        <th style="width: 8rem;">Suma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < items.Count; i++)
+                    {
+                        <tr>
+                            <td>
+                                @items[i].Instrument.Name
+                                <input type="hidden"
+                                       name="DocumentInstruments[@i].InstrumentId"
+                                       value="@items[i].InstrumentId" />
+                            </td>
+                            <td>
+                                @items[i].Instrument.Category.Name
+                            </td>
+                            <td>
+                                @items[i].Instrument.Price
+                            </td>
+                            <td>
+                                 @items[i].Quantity
+                            </td>
+                            <td>
+                                @(items[i].Quantity * @items[i].Instrument.Price)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <p>Brak instrumentów przekazanych do dokumentu</p>
+
+    }
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.DocumentId">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

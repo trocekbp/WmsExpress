@@ -1,0 +1,73 @@
+﻿@model WmsCore.Models.Document
+
+@{
+    ViewData["Title"] = "Create Document";
+}
+
+<div class="container my-4">
+    <h1 class="mb-4">Nowy dokument PZ</h1>
+    <h3>Dostawca: @ViewBag.supplier.Name</h3>
+    <h4>Adres Dostawcy: </h4>
+    <h5>
+        <ol>Kod pocztowy - @ViewBag.supplier.Address.PostalCode</ol>
+        <ol>Miasto - @ViewBag.supplier.Address.City</ol>
+        <ol>Ulica - @ViewBag.supplier.Address.Street</ol>
+    </h5>
+        <form asp-action="Create" method="post">
+ 
+        @if (Model.DocumentInstruments != null && Model.DocumentInstruments.Any())
+        {
+            var items = Model.DocumentInstruments.ToList();
+
+            <h4 class="mt-4 mb-3">Instrumenty w dokumencie</h4>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Nazwa instrumentu</th>
+                            <th>Kategoria</th>
+                            <th>Dostawca</th>
+                            <th style="width: 8rem;">Ilość</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < items.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @items[i].Instrument.Name
+                                    <input type="hidden"
+                                    name="DocumentInstruments[@i].InstrumentId"
+                                    value="@items[i].InstrumentId" />
+                                </td>
+                                <td>@items[i].Instrument.Category.Name</td>
+                                <td>@items[i].Instrument.Supplier?.Name</td>
+                                <td>
+                                    <input type="number"
+                                    name="DocumentInstruments[@i].Quantity"
+                                    value="@items[i].Quantity"
+                                    class="form-control"
+                                     min="1" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <p>Brak instrumentów przekazanych do dokumentu</p>
+            
+        }
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Zapisz dokument</button>
+            <a asp-action="Index" class="btn btn-secondary ms-2">Anuluj</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial");
+}

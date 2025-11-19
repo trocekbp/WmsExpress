@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Strona główna";
+}
+
+<div class="jumbotron">
+    <h1 class="mb-5">Zarządzanie magazynem muzycznym</h1>
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h5>Witaj w aplikacji służącej do zarządzania asortymentem muzycznym</h5>
+        <p>
+            To prosta aplikacja umożliwiająca dodawanie i zarządzanie artykułami oraz dostawcami z branży muzycznej.
+        </p>
+    </div>
+    <a href="/Instruments"
+       class="col-md-4 d-block text-dark text-decoration-none">
+       <div class="kafelek"> 
+        <h2>Instrumenty</h2>
+        <p>Przeglądaj oferty instrumentów na rynku.</p>
+        </div>
+    </a>
+
+    <a href="/Suppliers"
+       class="col-md-4 d-block text-dark text-decoration-none">
+        <div class="kafelek">
+        <h2>Dostawcy</h2>
+        <p>Zarządzaj bazą dostawców.</p>
+        </div>
+    </a>
+</div>
+<div class="row">
+    <div class="col-md-4"></div> <!-- spacer -->
+
+    <a href="/InstrumentInventories"
+       class="col-md-4 d-block text-dark text-decoration-none">
+        <div class="kafelek">
+            <h2>Magazyn</h2>
+            <p>Dodawaj, wydawaj oraz edytuj instrumenty przechowywane w magazynie.</p>
+        </div>
+    </a>
+    <a href="/Documents"
+       class="col-md-4 d-block text-dark text-decoration-none">
+        <div class="kafelek">
+            <h2>Dokumenty</h2>
+            <p>Dokumenty zarządzające stanem magazynowym, dodawaj asortyment na podstawie dokumentów PZ.</p>
+        </div>
+    </a>
+</div>
