@@ -1,0 +1,90 @@
+﻿@model WmsCore.Models.Contractor
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Contractor</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NIP" class="control-label"></label>
+                <input asp-for="NIP" class="form-control" />
+                <span asp-validation-for="NIP" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Email" class="control-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsContractor" /> @Html.DisplayNameFor(model => model.IsContractor)
+                </label>
+            </div>
+            <div class="form-group form-check">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsCustomer" /> @Html.DisplayNameFor(model => model.IsCustomer)
+                </label>
+            </div>
+
+            <fieldset  style="margin-top:10px;">
+                <legend>Dane adresowe</legend>
+                <div class="form-group">
+                    <label asp-for="Address.Street" class="control-label"></label>
+                    <input asp-for="Address.Street" class="form-control" />
+                    <span asp-validation-for="Address.Street" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Address.City" class="control-label"></label>
+                    <input asp-for="Address.City" class="form-control" />
+                    <span asp-validation-for="Address.City" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Address.PostalCode" class="control-label"></label>
+                    <input asp-for="Address.PostalCode" class="form-control" />
+                    <span asp-validation-for="Address.PostalCode" class="text-danger"></span>
+                </div>
+            </fieldset>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const toggleBtn = document.getElementById('toggleAddressBtn');
+        const fieldset = document.getElementById('addressFields');
+
+        toggleBtn.addEventListener('click', function() {
+            if (fieldset.style.display === 'none') {
+                fieldset.style.display = 'block';
+                toggleBtn.textContent = 'Ukryj adres';
+            } else {
+                fieldset.style.display = 'none';
+                toggleBtn.textContent = 'Pokaż adres';
+
+                // Wyczyść pola po schowaniu
+                fieldset.querySelectorAll('input').forEach(input => input.value = '');
+            }
+        });
+    </script>
+}

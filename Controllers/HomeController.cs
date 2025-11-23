@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WmsCore.Models;
 
-namespace WmsCore.Controllers;
+namespace Music_Store_Warehouse_App.Controllers;
 
 public class HomeController : Controller
 {

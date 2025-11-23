@@ -16,7 +16,13 @@ namespace WmsCore.Models
         [DisplayName("Data wystawienia")]
         public DateTime Date { get; set; } = DateTime.Now; //Dana wystawienia
 
-        public ICollection<DocumentInstrument> DocumentInstruments { get; set; }
-           = new List<DocumentInstrument>();
+        public ICollection<DocumentItem> DocumentItems { get; set; }
+           = new List<DocumentItem>();
+
+        public int? ContractorId { get; set; }
+
+        [DisplayName("Kontrahent")]
+        public Contractor Contractor { get; set; }
+
     }
 }

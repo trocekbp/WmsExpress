@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WmsCore.Data;
 
@@ -11,9 +12,11 @@ using WmsCore.Data;
 namespace Music_Store_Warehouse_App.Migrations
 {
     [DbContext(typeof(WmsCoreContext))]
-    partial class WmsCoreContextModelSnapshot : ModelSnapshot
+    [Migration("20251122232017_NIP")]
+    partial class NIP
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,6 +34,7 @@ namespace Music_Store_Warehouse_App.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AddressId"));
 
                     b.Property<string>("City")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -38,9 +42,11 @@ namespace Music_Store_Warehouse_App.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PostalCode")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Street")
+                        .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
@@ -157,6 +163,7 @@ namespace Music_Store_Warehouse_App.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("NIP")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -244,6 +251,9 @@ namespace Music_Store_Warehouse_App.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<int?>("ContractorId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -264,6 +274,8 @@ namespace Music_Store_Warehouse_App.Migrations
                         .IsUnique();
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("ContractorId");
 
                     b.ToTable("Item");
                 });
@@ -370,6 +382,10 @@ namespace Music_Store_Warehouse_App.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WmsCore.Models.Contractor", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ContractorId");
+
                     b.Navigation("Category");
                 });
 
@@ -405,6 +421,8 @@ namespace Music_Store_Warehouse_App.Migrations
                         .IsRequired();
 
                     b.Navigation("Documents");
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("WmsCore.Models.Document", b =>
