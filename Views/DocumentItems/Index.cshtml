@@ -1,0 +1,138 @@
+﻿@using WmsCore.Data
+@model PaginatedList<Item>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<h1>
+    Wybór pozycji dokumentu 
+</h1>
+@if (ViewBag.DocumentType != null)
+{
+    <div class="alert alert-info">
+        Typ dokumentu: <strong>@ViewBag.DocumentType</strong>
+    </div>
+}  
+<p>
+
+<form asp-action="Index" method="get" class="form-inline mb-3">
+    <p class="mb-0">
+        <!-- Pole wyszukiwania -->
+        <label class="mr-2">
+            Szukana nazwa:
+            <input type="text"
+                   name="searchString"
+                   value="@(ViewData["CurrentFilter"] ?? "")"
+                   class="form-control form-control-sm ml-1"
+                   style="width: 200px;" />
+        </label>
+
+        <!-- Dropdown kategorii -->
+        <label class="ml-3 mr-2">
+            kategoria:
+            <select name="categoryId"
+                    id="categoryId"
+                    class="form-control form-control-sm ml-1"
+                    style="width: 180px;">
+                <option value="">Wszystkie</option>
+                @foreach (SelectListItem cat in (SelectList)ViewData["CategoryList"])
+                {
+                    <option value="@cat.Value" selected="@(cat.Selected ? "selected" : null)">
+                        @cat.Text
+                    </option>
+                }
+            </select>
+        </label>
+
+        <button type="submit" class="btn btn-default">Szukaj</button>   |
+        <a asp-action="Index" asp-route-documentId="@ViewBag.documentId">Wyczyść</a>
+    </p>
+</form>
+
+<form asp-controller="DocumentItems" asp-action="Create" method="Get">
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["CodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-documentId="@ViewBag.documentId">Code</a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Acronym)
+            </th>
+            <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-documentId="@ViewBag.documentId">Name</a>
+            </th>
+            <th>
+                    <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]" asp-route-documentId="@ViewBag.documentId">Price</a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].EAN)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Category)
+            </th>
+            <th>
+                Zaznacz
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Acronym)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EAN)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.CategoryId)
+                </td>
+                <td>
+                    <input type="checkbox"
+                            name="selectedIds"
+                           value="@item.ItemId" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+        <input type="hidden" name="documentId" value="@ViewBag.DocumentId" />
+        <input type="submit" value="Dalej" class="btn btn-primary" />
+</form>
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   asp-route-documentId="@ViewBag.documentId"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   asp-route-documentId="@ViewBag.documentId"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>

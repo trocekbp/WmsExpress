@@ -160,10 +160,10 @@ namespace Music_Store_Warehouse_App.Views
             }
 
             // Jeżeli użytkownik wcisnął „Zapisz instrument”
-            else if (action == "SaveInstrument")
+            else if (action == "Save")
             {
                 // Przypisz z POST-a listę cech (może być pusta, jeżeli nie było tabeli)
-                item.Attributes = Attributes;
+               // item.Attributes = Attributes;
 
                 // Teraz wykonujemy normalną walidację całego modelu
                 if (!ModelState.IsValid)
@@ -196,7 +196,7 @@ namespace Music_Store_Warehouse_App.Views
             ViewBag.SupplierList = new SelectList(
                 _context.Contractor, "ContractorId", "Name");
 
-            ViewBag.CategoryList = new SelectList(
+            ViewData["CategoryId"] = new SelectList(
                 _context.Category, "CategoryId", "Name");
         }
 

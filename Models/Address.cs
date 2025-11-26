@@ -29,7 +29,7 @@ namespace WmsCore.Models
         public Contractor Contractor { get; set; }
 
         public bool IsEmpty() => string.IsNullOrWhiteSpace(Street)
-                          && string.IsNullOrWhiteSpace(City)
-                          && string.IsNullOrWhiteSpace(PostalCode);
+                          || string.IsNullOrWhiteSpace(City)
+                          || string.IsNullOrWhiteSpace(PostalCode);
     }
 }

@@ -4,6 +4,7 @@
     {
         PZ, //Przyjęcie zewnętrzne
         WZ, //Wydanie zewnętrzne
-        ZZ, //Zlecenie Zamówienia na przyszłość
+        PW, //Przyjęcie zewnętrzne
+        RW, //Rozchód wewnętrzny
     }
 }
