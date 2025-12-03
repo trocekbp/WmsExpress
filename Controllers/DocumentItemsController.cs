@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.CodeAnalysis;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
 using WmsCore.Data;
 using WmsCore.Models;
 using WmsCore.ViewModels;
@@ -146,6 +147,16 @@ namespace Music_Store_Warehouse_App.Controllers
                 await _context.SaveChangesAsync();
                 int docId = documentItems.FirstOrDefault().DocumentId;
                 return RedirectToAction("Details", "Documents", new {id =  docId});
+            }
+
+          var selectedIds = documentItems.Select(di => di.ItemId).ToList();
+          var itemsFromDb = _context.Item
+          .Where(i => selectedIds.Contains(i.ItemId))
+          .Include(i => i.Category)
+          .ToList();
+
+            foreach (var di in documentItems) {
+                di.Item = itemsFromDb.First(i => i.ItemId == di.ItemId);
             }
 
             return View(documentItems);

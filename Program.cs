@@ -12,7 +12,6 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-
 // -- Seed Data --
 using (var scope = app.Services.CreateScope())
 {
