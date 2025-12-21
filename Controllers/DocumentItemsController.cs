@@ -116,18 +116,25 @@ namespace Music_Store_Warehouse_App.Controllers
         }
 
         // GET: DocumentItems/Create
-        public IActionResult Create(int documentId, List<int> selectedIds)
+        public IActionResult Create(DocumentItemsViewModel vm)
         {
-            if (selectedIds == null || !selectedIds.Any())
-                return RedirectToAction("Index", new { documentId }); // brak wybranych pozycji
+            if (vm.SelectedItems == null || !vm.SelectedItems.Any())
+            {
+                TempData["ErrorMessage"] = "Musisz zaznaczyć przynajmniej jedną pozycję.";
+                return RedirectToAction("Index", new
+                {
+                    DocumentId = vm.DocumentId,
+                    DocumentType = vm.DocumentType
+                }); // brak wybranych pozycji
+            }
             var itemsFromDb = _context.Item
-                .Where(i => selectedIds.Contains(i.ItemId))
+                .Where(i => vm.SelectedItems.Contains(i.ItemId))
                 .Include(i => i.Category)
                 .ToList();
 
             var documentItems = itemsFromDb.Select(i => new DocumentItem
             {
-                DocumentId = documentId,
+                DocumentId = vm.DocumentId,
                 ItemId = i.ItemId,
                 Item = i,
             }).ToList();

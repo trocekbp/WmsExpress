@@ -154,6 +154,13 @@
             </button>
         </div>
         <div class="mt-5">
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-3">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
             <input style="padding-inline: 20px" type="submit" asp-controller="DocumentItems" asp-action="Create" value="Dalej" class="btn btn-primary" />
         </div>
     </form>
