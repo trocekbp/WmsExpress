@@ -13,7 +13,5 @@ namespace WmsCore.Models
         public string Name { get; set; } 
        
         public ICollection<Attribute> Attributes { get; set; }
-
-
     }
 }

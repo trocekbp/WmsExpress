@@ -42,6 +42,13 @@ namespace WmsCore.Data
                  .WithOne(a => a.Contractor)
                  .HasForeignKey<Address>(a => a.ContractorId)
                  .OnDelete(DeleteBehavior.Cascade);
+            //kaskadowe usuwanie pozycji wraz z dokumentem
+            modelBuilder
+                 .Entity<WmsCore.Models.Document>()
+                 .HasMany(d => d.DocumentItems)
+                 .WithOne(i => i.Document)
+                 .HasForeignKey(i => i.DocumentId)
+                 .OnDelete(DeleteBehavior.Cascade);
 
             //Relacja jeden do jednego Itemu oraz Encji zapasu w magazynie
             modelBuilder.Entity<Item>()

@@ -53,8 +53,9 @@ namespace Music_Store_Warehouse_App.Controllers
         public IActionResult Create(DocumentType? type)
         {
             ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name");
-            ViewBag.Type = type; 
-            return View();
+            ViewBag.Type = type;
+            var document = new Document(); //inicjalizacja i przekazanie daty wystawienia
+            return View(document);
         }
 
         // POST: Documents/Create
@@ -68,7 +69,7 @@ namespace Music_Store_Warehouse_App.Controllers
             {
                 _context.Add(document);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "DocumentItems", new {documentId = document.DocumentId});
+                return RedirectToAction("Index", "DocumentItems", new {documentId = document.DocumentId, documentType = document.Type});
             }
             ViewBag.Type = document.Type;
             ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name", document.ContractorId);
@@ -166,5 +167,6 @@ namespace Music_Store_Warehouse_App.Controllers
         {
             return _context.Document.Any(e => e.DocumentId == id);
         }
+
     }
 }

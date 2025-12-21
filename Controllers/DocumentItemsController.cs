@@ -23,35 +23,29 @@ namespace Music_Store_Warehouse_App.Controllers
 
         // GET: DocumentItems
         public async Task<IActionResult> Index(
-            int documentId,
-            string sortOrder,
-            string currentFilter,
-            string searchString,
-            int? pageNumber,
-            int? categoryId,
-            string? documentType)
+           DocumentItemsViewModel vm)
         {
-            ViewData["CurrentSort"] = sortOrder;
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
-            ViewData["CurrentFilter"] = searchString;
+            if (vm.DocumentId == 0){
+             return BadRequest("Brak Id dokumentu");
+            }
 
-            if (searchString != null)
+            ViewData["CodeSortParam"] = String.IsNullOrEmpty(vm.SortOrder) ? "code_desc" : "";
+            ViewData["NameSortParam"] = vm.SortOrder == "Name" ? "name_desc" : "Name";
+            ViewData["PriceSortParam"] = vm.SortOrder == "Price" ? "price_desc" : "Price";
+
+            //obsługa filtrów
+            if (vm.SearchString != null)
             {
-                pageNumber = 1;
+                vm.PageNumber = 1;
             }
-            else
-            {
-                searchString = currentFilter;
-            }
+
 
             var categories = await _context.Category
                            .OrderBy(c => c.Name)
                            .ToListAsync();
 
 
-            ViewData["CategoryList"] = new SelectList(categories, "CategoryId", "Name", categoryId);
-            ViewData["CurrentCategory"] = categoryId; // by wiedzieć, która opcja ma być selected
+           vm.CategoryList= new SelectList(categories, "CategoryId", "Name", vm.CategoryId);            
 
 
             IQueryable<Item> items = _context.Item
@@ -59,21 +53,27 @@ namespace Music_Store_Warehouse_App.Controllers
                                                 .Include(i => i.ItemInventory);
 
             // --- Filtrowanie po wyszukiwanej frazie ---
-            if (!String.IsNullOrEmpty(searchString))
+            if (!String.IsNullOrEmpty(vm.SearchString))
             {
                 items = items.Where(s =>
-                    s.Name.Contains(searchString) || s.Acronym.Contains(searchString));
+                    s.Name.Contains(vm.SearchString) || s.Acronym.Contains(vm.SearchString));
             }
 
             // --- Filtrowanie po kategorii, jeśli użytkownik wybrał categoryId ---
-            if (categoryId.HasValue)
+            if (vm.CategoryId.HasValue)
             {
-                items = items.Where(i => i.CategoryId == categoryId.Value);
+                items = items.Where(i => i.CategoryId == vm.CategoryId.Value);
             }
 
 
-            switch (sortOrder)
+            switch (vm.SortOrder)
             {
+                case "code_desc":
+                    items = items.OrderByDescending(s => s.Code);
+                    break;
+                case "Name":
+                    items = items.OrderBy(s => s.Name);
+                    break;
                 case "name_desc":
                     items = items.OrderByDescending(s => s.Name);
                     break;
@@ -84,14 +84,15 @@ namespace Music_Store_Warehouse_App.Controllers
                     items = items.OrderByDescending(s => s.Price);
                     break;
                 default:
-                    items = items.OrderBy(s => s.Name);
+                    items = items.OrderBy(s => s.Code);
                     break;
             }
 
-            int pageSize = 10;
-            ViewBag.DocumentType = documentType;
-            ViewBag.DocumentId = documentId;
-            return View(await PaginatedList<Item>.CreateAsync(items.AsNoTracking(), pageNumber ?? 1, pageSize));
+            int pageSize = 15;
+
+            var paginatedList = await PaginatedList<Item>.CreateAsync(items.AsNoTracking(), vm.PageNumber ?? 1, pageSize);
+            vm.Items = paginatedList;
+            return View(vm);
         }
 
         // GET: DocumentItems/Details/5
@@ -141,23 +142,35 @@ namespace Music_Store_Warehouse_App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(List<DocumentItem> documentItems)
         {
+            var selectedIds = documentItems.Select(di => di.ItemId).ToList();
+            var itemsFromDb = _context.Item
+            .Where(i => selectedIds.Contains(i.ItemId))
+            .Include(i => i.Category)
+            .ToList();
+
+            foreach (var di in documentItems)
+            {
+                di.Item = itemsFromDb.First(i => i.ItemId == di.ItemId);
+            }
+
             if (ModelState.IsValid)
             {
                 _context.DocumentItem.AddRange(documentItems);
-                await _context.SaveChangesAsync();
+     
+
                 int docId = documentItems.FirstOrDefault().DocumentId;
+                var document = await _context.Document.FindAsync(docId);
+                if (document == null)
+                {
+                    return NotFound($"Wystąpił błąd podczas wyliczania wartości dokumentu");
+                }
+
+                document.TotalValue = calculateTotalVal(documentItems);
+                await _context.SaveChangesAsync();
+
                 return RedirectToAction("Details", "Documents", new {id =  docId});
             }
 
-          var selectedIds = documentItems.Select(di => di.ItemId).ToList();
-          var itemsFromDb = _context.Item
-          .Where(i => selectedIds.Contains(i.ItemId))
-          .Include(i => i.Category)
-          .ToList();
-
-            foreach (var di in documentItems) {
-                di.Item = itemsFromDb.First(i => i.ItemId == di.ItemId);
-            }
 
             return View(documentItems);
         }
@@ -255,6 +268,11 @@ namespace Music_Store_Warehouse_App.Controllers
         private bool DocumentItemExists(int id)
         {
             return _context.DocumentItem.Any(e => e.DocumentItemId == id);
+        }
+        private decimal calculateTotalVal(List<DocumentItem> items)
+        {
+            var total = items.Sum(i => i.Item.Price * i.Quantity);
+            return total;
         }
     }
 }

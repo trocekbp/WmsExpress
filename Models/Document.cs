@@ -17,27 +17,29 @@ namespace WmsCore.Models
         public DocumentType Type { get; set; }
 
         [DataType(DataType.Date)]
-        [DisplayName("Data dokumentu")]
-        public DateTime Date { get; set; } //Dana wystawienia
+        [DisplayName("Data obowiązywania")]
+        public DateTime Date { get; set; } = DateTime.Now; //Data obowiązywania
 
         [DataType(DataType.Date)]
         [DisplayName("Data wystawienia")]
-        public DateTime IssueDate { get; set; } = DateTime.Now; //Dana wystawienia
+        public DateTime IssueDate { get; set; } = DateTime.Now; //Data wystawienia
+
+        public DateTime CreationDate { get; private set; } = DateTime.Now; //Data utworzenia informacyjnie, nieedytowalna
 
         [DisplayName("Wartość")]
         public decimal TotalValue { get; set; }
 
         [DisplayName("Opis")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public ICollection<DocumentItem> DocumentItems { get; set; }
            = new List<DocumentItem>();
 
         [DisplayName("Kontrahent")]
-        public int? ContractorId { get; set; }
+        public int ContractorId { get; set; }
 
         [ValidateNever]
-        public Contractor Contractor { get; set; }
+        public Contractor Contractor { get; set; } 
 
     }
 }

@@ -47,3 +47,7 @@ body {
     .kafelek:hover {
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); /* delikatny cieñ przy najechaniu */
     }
+.big-checkbox {
+    width: 1.3em;
+    height: 1.3em;
+}
