@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using WmsCore.Data;
 using WmsCore.Models;
 using WmsCore.Models.Enums;
+using WmsCore.Models.Helpers;
 
 namespace Music_Store_Warehouse_App.Controllers
 {
@@ -65,15 +66,27 @@ namespace Music_Store_Warehouse_App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Document document)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
+                ViewBag.Type = document.Type;
+                ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name", document.ContractorId);
+                return View(document);
+            }
+            try
+            {
+                document.Number = await GenerateDocumentNumber(document.IssueDate); //generowanie unikalnego numeru dokumentu na podstawie daty wystawienia
+                document.CreationDate = DateTime.Now;
+
                 _context.Add(document);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "DocumentItems", new {documentId = document.DocumentId, documentType = document.Type});
+                return RedirectToAction("Index", "DocumentItems", new { documentId = document.DocumentId, documentType = document.Type });
             }
-            ViewBag.Type = document.Type;
-            ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name", document.ContractorId);
-            return View(document);
+            catch(InvalidOperationException ex) {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(document);
+            }
+            
+           
         }
 
         // GET: Documents/Edit/5
@@ -98,7 +111,7 @@ namespace Music_Store_Warehouse_App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DocumentId,Number,Type,Date,IssueDate,TotalValue,Description,ContractorId")] Document document)
+        public async Task<IActionResult> Edit(int id, [Bind("DocumentId,Type,Date,IssueDate,TotalValue,Description,ContractorId")] Document document)
         {
             if (id != document.DocumentId)
             {
@@ -114,7 +127,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DocumentExists(document.DocumentId))
+                    if (!await _context.Document.AnyAsync(d => d.DocumentId == document.DocumentId))
                     {
                         return NotFound();
                     }
@@ -163,10 +176,24 @@ namespace Music_Store_Warehouse_App.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DocumentExists(int id)
-        {
-            return _context.Document.Any(e => e.DocumentId == id);
+        private async Task<string> GenerateDocumentNumber(DateTime docDate) {
+            var result = await _context.Set<DocumentNumberResult>().FromSqlRaw(
+                "SELECT dbo.fn_GenerateDocumentNumber({0}) as Number", docDate
+                )
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (result == null || string.IsNullOrEmpty(result.Number))
+                throw new InvalidOperationException("Nie udało się wygenerować numeru dokumentu.");
+
+            if (result.Number == "LIMIT")
+                throw new InvalidOperationException(
+                    "Przekroczono limit 9999 dokumentów w roku. Skontaktuj się z producentem systemu."
+                );
+
+            return result.Number;
         }
+
 
     }
 }

@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using WmsCore.Models;
+using WmsCore.Models.Helpers;
 
 
 namespace WmsCore.Data
@@ -50,6 +52,14 @@ namespace WmsCore.Data
                  .HasForeignKey(i => i.DocumentId)
                  .OnDelete(DeleteBehavior.Cascade);
 
+            //konfiguracja pola Number
+            modelBuilder.Entity<WmsCore.Models.Document>()
+                .Property(d => d.Number)
+                .HasMaxLength(9)
+                .IsRequired()
+                .ValueGeneratedOnAdd()
+                .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Save); //Wzięte z dokumentacji efcore, nie jest robione OUTPUT dla tego pola i będzie ono działało z trigerrami
+
             //Relacja jeden do jednego Itemu oraz Encji zapasu w magazynie
             modelBuilder.Entity<Item>()
               .HasOne(i => i.ItemInventory)
@@ -57,6 +67,9 @@ namespace WmsCore.Data
               .HasForeignKey<ItemInventory>(ii => ii.ItemId)
             // usunięcie ItemInventory nie skasuje Item:
             .OnDelete(DeleteBehavior.Restrict);
+
+            // dodanie wirtualnej encji modelu do bazy danych która umożliwi łatwe odczytanie wyniku funkcji
+            modelBuilder.Entity<DocumentNumberResult>().HasNoKey(); 
         }
     }
 }

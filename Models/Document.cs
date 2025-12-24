@@ -1,16 +1,20 @@
-﻿using WmsCore.Models.Enums;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using WmsCore.Models.Enums;
 
 namespace WmsCore.Models
 {
+
+    [Index(nameof(Number), IsUnique = true)]
     public class Document
     {
         public int DocumentId { get; set; }
 
         [DisplayName("Numer")]
-        public string Number { get; set; }
+        [ValidateNever]
+        public string? Number { get; set; } //generowany za pomocą funkcji
 
         [Required(ErrorMessage = "Typ dokumentu jest wymagany")]
         [DisplayName("Typ")]
@@ -24,7 +28,7 @@ namespace WmsCore.Models
         [DisplayName("Data wystawienia")]
         public DateTime IssueDate { get; set; } = DateTime.Now; //Data wystawienia
 
-        public DateTime CreationDate { get; private set; } = DateTime.Now; //Data utworzenia informacyjnie, nieedytowalna
+        public DateTime CreationDate { get; set; } //Data utworzenia informacyjnie, wstawiana przez trigger
 
         [DisplayName("Wartość")]
         public decimal TotalValue { get; set; }
