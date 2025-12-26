@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WmsCore.Data;
 using WmsCore.Models;
@@ -74,7 +76,7 @@ namespace Music_Store_Warehouse_App.Controllers
             }
             try
             {
-                document.Number = await GenerateDocumentNumber(document.Date); //generowanie unikalnego numeru dokumentu na podstawie daty wystawienia
+                document.Number = await GenerateDocumentNumber(document.Date, document.Type); //generowanie unikalnego numeru dokumentu na podstawie daty wystawienia
                 document.CreationDate = DateTime.Now;
 
                 _context.Add(document);
@@ -176,21 +178,28 @@ namespace Music_Store_Warehouse_App.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<string> GenerateDocumentNumber(DateTime docDate) {
-            var result = await _context.Set<DocumentNumberResult>().FromSqlRaw(
-                "SELECT dbo.fn_GenerateDocumentNumber({0}) as Number", docDate
-                )
-                .AsNoTracking()
-                .FirstOrDefaultAsync();
-            if (result == null || string.IsNullOrEmpty(result.Number))
+        private async Task<string> GenerateDocumentNumber(DateTime docDate, DocumentType docType) {
+
+            var sql = "SELECT dbo.fn_GenerateDocumentNumber(@dateParam, @typeParam)";
+            string docNumber = string.Empty;
+            using (var connection = new SqlConnection(_context.Database.GetConnectionString()))
+            {
+                docNumber = await connection.ExecuteScalarAsync<string>(sql, new { dateParam = docDate, typeParam = docType.ToString()});
+            }
+
+            if (docNumber == null || string.IsNullOrEmpty(docNumber))
                 throw new InvalidOperationException("Nie udało się wygenerować numeru dokumentu.");
 
-            if (result.Number == "LIMIT")
+            if (docNumber == "LIMIT")
                 throw new InvalidOperationException(
                     "Przekroczono limit 9999 dokumentów w roku. Skontaktuj się z producentem systemu."
                 );
+            if (docNumber == "INVALID")
+                throw new InvalidOperationException(
+                    "Niepoprawny typ dokumentu."
+                );
 
-            return result.Number;
+            return docNumber;
         }
 
 
