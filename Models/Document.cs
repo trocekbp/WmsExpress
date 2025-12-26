@@ -21,12 +21,12 @@ namespace WmsCore.Models
         public DocumentType Type { get; set; }
 
         [DataType(DataType.Date)]
-        [DisplayName("Data obowiązywania")]
-        public DateTime Date { get; set; } = DateTime.Now; //Data obowiązywania
+        [DisplayName("Data wystawienia")]
+        public DateTime Date { get; set; } = DateTime.Now; //Data wystawienia
 
         [DataType(DataType.Date)]
-        [DisplayName("Data wystawienia")]
-        public DateTime IssueDate { get; set; } = DateTime.Now; //Data wystawienia
+        [DisplayName("Data obowiązywania")]
+        public DateTime OperationDate { get; set; } = DateTime.Now; //Data obowiązywania
 
         public DateTime CreationDate { get; set; } //Data utworzenia informacyjnie, wstawiana przez trigger
 

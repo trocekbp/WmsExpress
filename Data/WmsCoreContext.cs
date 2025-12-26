@@ -69,7 +69,9 @@ namespace WmsCore.Data
             .OnDelete(DeleteBehavior.Restrict);
 
             // dodanie wirtualnej encji modelu do bazy danych która umożliwi łatwe odczytanie wyniku funkcji
-            modelBuilder.Entity<DocumentNumberResult>().HasNoKey(); 
+            modelBuilder.Entity<DocumentNumberResult>()
+                .HasNoKey()
+                .ToView(null); //Aby nie stworzyć tabeli 
         }
     }
 }

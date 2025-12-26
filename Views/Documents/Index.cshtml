@@ -5,11 +5,47 @@
 }
 
 <h1>Index</h1>
+<div class="row">
+    <!-- PRZYJĘCIA -->
+    <div class="col-md-6">
+        <h5 class="mb-3">Przyjęcia</h5>
 
-<p>
-    <a asp-action="Create" asp-route-type="PZ">Dodaj PZ</a>
-</p>
-<table class="table">
+        <div class="d-flex align-items-start gap-2 flex-wrap">
+            <a asp-action="Create"
+               asp-route-type="PZ"
+               class="btn btn-outline-primary">
+                Przyjęcie zewnętrzne (PZ)
+            </a>
+
+            <a asp-action="Create"
+               asp-route-type="PW"
+               class="btn btn-outline-primary">
+                Przyjęcie wewnętrzne (PW)
+            </a>
+        </div>
+    </div>
+
+    <!-- WYDANIA -->
+    <div class="col-md-6">
+        <h5 class="mb-3">Wydania</h5>
+
+        <div class="d-flex align-items-start gap-2 flex-wrap">
+            <a asp-action="Create"
+               asp-route-type="WZ"
+               class="btn btn-outline-primary">
+                Wydanie zewnętrzne (WZ)
+            </a>
+
+            <a asp-action="Create"
+               asp-route-type="RW"
+               class="btn btn-outline-primary">
+                Rozchód wewnętrzny (RW)
+            </a>
+        </div>
+    </div>
+</div>
+
+<table class="table mt-4">
     <thead>
         <tr>
             <th>
@@ -22,7 +58,7 @@
                 @Html.DisplayNameFor(model => model.Date)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.IssueDate)
+                @Html.DisplayNameFor(model => model.OperationDate)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.TotalValue)
@@ -49,7 +85,7 @@
                 @Html.DisplayFor(modelItem => item.Date)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.IssueDate)
+                @Html.DisplayFor(modelItem => item.OperationDate)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.TotalValue)

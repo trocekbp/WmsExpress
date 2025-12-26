@@ -2,12 +2,14 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WmsCore.Data;
 using WmsCore.Models;
+using WmsCore.Models.Enums;
 using WmsCore.ViewModels;
 
 namespace Music_Store_Warehouse_App.Controllers
@@ -25,8 +27,9 @@ namespace Music_Store_Warehouse_App.Controllers
         public async Task<IActionResult> Index(
            DocumentItemsViewModel vm)
         {
-            if (vm.DocumentId == 0){
-             return BadRequest("Brak Id dokumentu");
+            if (vm.DocumentId == 0)
+            {
+                return BadRequest("Brak Id dokumentu");
             }
 
             ViewData["CodeSortParam"] = String.IsNullOrEmpty(vm.SortOrder) ? "code_desc" : "";
@@ -45,7 +48,7 @@ namespace Music_Store_Warehouse_App.Controllers
                            .ToListAsync();
 
 
-           vm.CategoryList= new SelectList(categories, "CategoryId", "Name", vm.CategoryId);            
+            vm.CategoryList = new SelectList(categories, "CategoryId", "Name", vm.CategoryId);
 
 
             IQueryable<Item> items = _context.Item
@@ -155,31 +158,44 @@ namespace Music_Store_Warehouse_App.Controllers
             .Include(i => i.Category)
             .ToList();
 
+            //przypisanie obiektów w liście documentsItem na podstawie ich ID ponieważ wysłane żądanie zawiera samo ID bez encji
             foreach (var di in documentItems)
             {
                 di.Item = itemsFromDb.First(i => i.ItemId == di.ItemId);
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.DocumentItem.AddRange(documentItems);
-     
-
-                int docId = documentItems.FirstOrDefault().DocumentId;
-                var document = await _context.Document.FindAsync(docId);
-                if (document == null)
-                {
-                    return NotFound($"Wystąpił błąd podczas wyliczania wartości dokumentu");
-                }
-
-                document.TotalValue = calculateTotalVal(documentItems);
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction("Details", "Documents", new {id =  docId});
+                return View(documentItems);
             }
 
+            int docId = documentItems.FirstOrDefault().DocumentId;
+            var document = await _context.Document.FindAsync(docId);
+            if (document == null)
+            {
+                return NotFound($"Błąd powiązania dokumentu");
+            }
 
-            return View(documentItems);
+            //Obsługa aktualizacji stanów magazynowych
+            try
+            {
+                await UpdateInventoryAsync(document, documentItems);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(documentItems);
+
+            }
+            await UpdateInventoryAsync(document, documentItems);
+
+
+            //Dodanie pozycji dokumentu oraz wyliczenie wartości dokumentu
+            _context.DocumentItem.AddRange(documentItems);
+            document.TotalValue = calculateTotalVal(documentItems);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Documents", new { id = docId });
         }
 
         // GET: DocumentItems/Edit/5
@@ -271,6 +287,86 @@ namespace Music_Store_Warehouse_App.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+        #region Aktualizacje stanów magazynowych
+        private async Task UpdateInventoryAsync(WmsCore.Models.Document document, List<DocumentItem> documentItems)
+        {
+            var selectedIds = documentItems.Select(i => i.ItemId);
+
+            //Pobranie istniejących zapisów stanów pozycji
+            var itemsInventory = await _context.ItemInventory
+                            .Where(i => selectedIds.Contains(i.ItemId))
+                            .ToListAsync();
+
+            if (document.Type.Equals(DocumentType.PZ) || document.Type.Equals(DocumentType.PW))
+            {
+                ApplyPZPWInventory(document, documentItems, itemsInventory);
+            }
+            else if (document.Type.Equals(DocumentType.WZ) || document.Type.Equals(DocumentType.RW))
+            {
+                try
+                {
+                    ApplyWZRWInventory(document, documentItems, itemsInventory);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    throw;
+                }
+
+            }
+            else
+            {
+                throw new ArgumentException("Nieprawidłowy typ dokumentu");
+            }
+
+        }
+        #endregion
+
+        #region Aktualizacje stanów PZ PW
+        private void ApplyPZPWInventory(WmsCore.Models.Document document, List<DocumentItem> documentItems, List<ItemInventory> itemsInventory)
+        {
+            foreach (var di in documentItems)
+            {
+                var inventory = itemsInventory.Where(i => i.ItemId == di.ItemId).SingleOrDefault();
+                // SINGLEORDEFAULT Rzuci wyjątek, jeśli będą 2 pasujące elementy
+                // dobre do wykrywania błędów w logice
+                if (inventory == null)
+                {
+                    _context.Add(new ItemInventory()
+                    {
+                        ItemId = di.ItemId,
+                        Quantity = di.Quantity,
+                    });
+                }
+                else
+                {
+                    inventory.Quantity += di.Quantity;
+                }
+            }
+        }
+        #endregion
+
+        #region  Aktualizacje stanów WZ RW
+        private void ApplyWZRWInventory(WmsCore.Models.Document document, List<DocumentItem> documentItems, List<ItemInventory> itemsInventory)
+        {
+            foreach (var di in documentItems)
+            {
+                var inventory = itemsInventory.Where(i => i.ItemId == di.ItemId).SingleOrDefault();
+                // SINGLEORDEFAULT Rzuci wyjątek, jeśli będą 2 pasujące elementy
+                // dobre do wykrywania błędów w logice
+                if (inventory == null)
+                {
+                    throw new InvalidOperationException($"Brak artykułu {di.Item.Code} w magazynie");
+                }
+                if (inventory.Quantity < di.Quantity)
+                {
+                    throw new InvalidOperationException($"Na magazynie nie ma wystarczającej ilości artykułu {di.Item.Code}");
+                }
+
+                //Wydanie ze stanu magazynowego
+                inventory.Quantity -= di.Quantity;
+            }
+        }
+        #endregion
 
         private bool DocumentItemExists(int id)
         {
@@ -280,6 +376,8 @@ namespace Music_Store_Warehouse_App.Controllers
         {
             var total = items.Sum(i => i.Item.Price * i.Quantity);
             return total;
+
         }
     }
 }
+
