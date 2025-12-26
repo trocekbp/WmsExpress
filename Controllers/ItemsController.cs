@@ -53,8 +53,7 @@ namespace Music_Store_Warehouse_App.Views
 
 
             IQueryable<Item> items = _context.Item
-                                                .Include(i => i.Category)
-                                                .Include(i => i.ItemInventory);
+                                                .Include(i => i.Category);
 
             // --- Filtrowanie po wyszukiwanej frazie ---
             if (!String.IsNullOrEmpty(searchString))
@@ -100,7 +99,7 @@ namespace Music_Store_Warehouse_App.Views
 
             var items = await _context.Item
                 .Include(i => i.Category)
-                .Include(i => i.ItemInventory)
+                .Include(i => i.InventoryMovements)
                 .Include(i => i.Attributes)
                     .ThenInclude(ifeat => ifeat.AtrDefinition) // ThenInclude - jeszcze dołączamy definicje cech
                 .FirstOrDefaultAsync(m => m.ItemId == id);

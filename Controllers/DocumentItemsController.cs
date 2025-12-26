@@ -53,7 +53,7 @@ namespace Music_Store_Warehouse_App.Controllers
 
             IQueryable<Item> items = _context.Item
                                                 .Include(i => i.Category)
-                                                .Include(i => i.ItemInventory);
+                                                .Include(i => i.InventoryMovements);
 
             // --- Filtrowanie po wyszukiwanej frazie ---
             if (!String.IsNullOrEmpty(vm.SearchString))
@@ -187,7 +187,6 @@ namespace Music_Store_Warehouse_App.Controllers
                 return View(documentItems);
 
             }
-            await UpdateInventoryAsync(document, documentItems);
 
 
             //Dodanie pozycji dokumentu oraz wyliczenie wartości dokumentu
@@ -293,19 +292,21 @@ namespace Music_Store_Warehouse_App.Controllers
             var selectedIds = documentItems.Select(i => i.ItemId);
 
             //Pobranie istniejących zapisów stanów pozycji
-            var itemsInventory = await _context.ItemInventory
+            var movements = await _context.InventoryMovement
                             .Where(i => selectedIds.Contains(i.ItemId))
                             .ToListAsync();
 
+
+
             if (document.Type.Equals(DocumentType.PZ) || document.Type.Equals(DocumentType.PW))
             {
-                ApplyPZPWInventory(document, documentItems, itemsInventory);
+                ApplyPZPWInventory(document, documentItems);
             }
             else if (document.Type.Equals(DocumentType.WZ) || document.Type.Equals(DocumentType.RW))
             {
                 try
                 {
-                    ApplyWZRWInventory(document, documentItems, itemsInventory);
+                    ApplyWZRWInventory(document, documentItems, movements);
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -322,48 +323,56 @@ namespace Music_Store_Warehouse_App.Controllers
         #endregion
 
         #region Aktualizacje stanów PZ PW
-        private void ApplyPZPWInventory(WmsCore.Models.Document document, List<DocumentItem> documentItems, List<ItemInventory> itemsInventory)
+        private void ApplyPZPWInventory(WmsCore.Models.Document document, List<DocumentItem> documentItems)
         {
             foreach (var di in documentItems)
             {
-                var inventory = itemsInventory.Where(i => i.ItemId == di.ItemId).SingleOrDefault();
-                // SINGLEORDEFAULT Rzuci wyjątek, jeśli będą 2 pasujące elementy
-                // dobre do wykrywania błędów w logice
-                if (inventory == null)
+                _context.Add(new InventoryMovement()
                 {
-                    _context.Add(new ItemInventory()
-                    {
-                        ItemId = di.ItemId,
-                        Quantity = di.Quantity,
-                    });
-                }
-                else
-                {
-                    inventory.Quantity += di.Quantity;
-                }
+                    Item = di.Item,
+                    Document = document,
+                    QuantityChange = di.Quantity,
+                    EffectiveDate = document.OperationDate, //Data zaksięgowania
+                });
             }
         }
         #endregion
 
         #region  Aktualizacje stanów WZ RW
-        private void ApplyWZRWInventory(WmsCore.Models.Document document, List<DocumentItem> documentItems, List<ItemInventory> itemsInventory)
+        private void ApplyWZRWInventory(WmsCore.Models.Document document, List<DocumentItem> documentItems, List<InventoryMovement> movements)
         {
+            //Wszystkie operacje magazynowe przed do dnia zaksięgowania dokumentu tak aby wiedzieć czy towary na pewno będą na stanie
+            var grouped_mvm = movements
+                        .Where(x => x.EffectiveDate <= document.OperationDate)
+                        .GroupBy(x => x.ItemId)
+                        .Select(group => new
+                        {
+                            ID = group.Key,
+                            AvailableStock = group.Sum(x => x.QuantityChange)
+                        });
+
             foreach (var di in documentItems)
             {
-                var inventory = itemsInventory.Where(i => i.ItemId == di.ItemId).SingleOrDefault();
-                // SINGLEORDEFAULT Rzuci wyjątek, jeśli będą 2 pasujące elementy
-                // dobre do wykrywania błędów w logice
-                if (inventory == null)
+                var stock = grouped_mvm.Where(gr => gr.ID == di.ItemId).SingleOrDefault(); 
+                if (stock == null)
                 {
-                    throw new InvalidOperationException($"Brak artykułu {di.Item.Code} w magazynie");
-                }
-                if (inventory.Quantity < di.Quantity)
-                {
-                    throw new InvalidOperationException($"Na magazynie nie ma wystarczającej ilości artykułu {di.Item.Code}");
+                    throw new InvalidOperationException($"Brak artykułu [{di.Item.Code}] w magazynie");
                 }
 
-                //Wydanie ze stanu magazynowego
-                inventory.Quantity -= di.Quantity;
+                if (stock.AvailableStock < di.Quantity) 
+                {
+                    throw new InvalidOperationException($"Na magazynie nie ma wystarczającej ilości artykułu [{di.Item.Acronym}], pozostałe zasoby = {stock.AvailableStock} na dzień {document.OperationDate}");
+                }
+
+                //Ruch magazynowy wydający towary
+
+                _context.Add(new InventoryMovement() { 
+                    Item = di.Item,
+                    Document = document,
+                    QuantityChange = -di.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu
+                    EffectiveDate = document.OperationDate //Wpływ na magazyn zgodnie z datą zaksięgowania dokumentu
+                }
+                );
             }
         }
         #endregion

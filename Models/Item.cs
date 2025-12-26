@@ -49,9 +49,9 @@ namespace WmsCore.Models
         // Nawigacja do przypisanych cech
         public ICollection<Attribute>? Attributes { get; set; }
 
-        //Nawigacja do stanu na magazynie
+        //Nawigacja do stanów na magazynie
         [ValidateNever]
-        public ItemInventory ItemInventory { get; set; }
+        public ICollection<InventoryMovement>? InventoryMovements { get; set; }
 
     }
 

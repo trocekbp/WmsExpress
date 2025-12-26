@@ -182,7 +182,6 @@ namespace Music_Store_Warehouse_App.Controllers
                 )
                 .AsNoTracking()
                 .FirstOrDefaultAsync();
-
             if (result == null || string.IsNullOrEmpty(result.Number))
                 throw new InvalidOperationException("Nie udało się wygenerować numeru dokumentu.");
 

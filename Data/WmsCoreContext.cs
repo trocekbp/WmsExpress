@@ -26,7 +26,7 @@ namespace WmsCore.Data
         public DbSet<WmsCore.Models.Attribute> Attribute { get; set; } = default!;
         public DbSet<Models.Document> Document { get; set; } = default!;
         public DbSet<DocumentItem> DocumentItem { get; set; } = default!;
-        public DbSet<ItemInventory> ItemInventory { get; set; } = default!;
+        public DbSet<InventoryMovement> InventoryMovement { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -37,6 +37,14 @@ namespace WmsCore.Data
                 .HasForeignKey(f => f.ItemId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            //Relacja jeden do jednego Itemu oraz Encji zapasu w magazynie
+            modelBuilder.Entity<Item>()
+              .HasMany(i => i.InventoryMovements)
+              .WithOne(ii => ii.Item)
+              .HasForeignKey(m => m.ItemId)
+            // usunięcie InventoryMovement nie skasuje Item:
+            .OnDelete(DeleteBehavior.Restrict);
+
             //kaskadowe usuwanie adresów wraz z dostawcą 
             modelBuilder
                  .Entity<Contractor>()
@@ -45,6 +53,7 @@ namespace WmsCore.Data
                  .HasForeignKey<Address>(a => a.ContractorId)
                  .OnDelete(DeleteBehavior.Cascade);
             //kaskadowe usuwanie pozycji wraz z dokumentem
+
             modelBuilder
                  .Entity<WmsCore.Models.Document>()
                  .HasMany(d => d.DocumentItems)
@@ -59,14 +68,6 @@ namespace WmsCore.Data
                 .IsRequired()
                 .ValueGeneratedOnAdd()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Save); //Wzięte z dokumentacji efcore, nie jest robione OUTPUT dla tego pola i będzie ono działało z trigerrami
-
-            //Relacja jeden do jednego Itemu oraz Encji zapasu w magazynie
-            modelBuilder.Entity<Item>()
-              .HasOne(i => i.ItemInventory)
-              .WithOne(ii => ii.Item)
-              .HasForeignKey<ItemInventory>(ii => ii.ItemId)
-            // usunięcie ItemInventory nie skasuje Item:
-            .OnDelete(DeleteBehavior.Restrict);
 
             // dodanie wirtualnej encji modelu do bazy danych która umożliwi łatwe odczytanie wyniku funkcji
             modelBuilder.Entity<DocumentNumberResult>()
