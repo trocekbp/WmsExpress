@@ -1,0 +1,118 @@
+﻿@model WmsCore.ViewModels.ItemInventoryViewModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h1>Details</h1>
+
+<div>
+    <h4>Item</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.Code)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.Code)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.Acronym)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.Acronym)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.Price)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.Price)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.Description)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.Description)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.EAN)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.EAN)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Item.Category)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Item.Category.CategoryId)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.TotalQuantity)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.TotalQuantity)
+        </dd>
+    </dl>
+</div>
+<div>
+    <h3>Historia</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    Dokument
+                </th>
+                <th>
+                    Numer
+                </th>
+                <th>
+                    Data zaksięgowania
+                </th>
+                <th>
+                    Ilość
+                </th>
+                <th>
+                    Kontrahent
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var history = Model.Item.InventoryMovements;
+            }
+            @foreach (var item in history)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Document.Type)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Document.Number)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Document.OperationDate)
+                    </td>
+                    <td class="@(item.QuantityChange > 0
+                            ? "bg-success bg-opacity-10 text-success fw-semibold"
+                            : item.QuantityChange < 0
+                                ? "bg-danger bg-opacity-10 text-danger fw-semibold"
+                                : "")">
+                        @item.QuantityChange
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Document.Contractor.Name)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

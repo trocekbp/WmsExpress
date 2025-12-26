@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using WmsCore.Models;
-using WmsCore.Models.Helpers;
 
 
 namespace WmsCore.Data
@@ -30,7 +29,7 @@ namespace WmsCore.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Itemu
+            modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Itemu 
                 .Entity<Item>()
                 .HasMany(i => i.Attributes)
                 .WithOne(f => f.Item)
@@ -64,15 +63,11 @@ namespace WmsCore.Data
             //konfiguracja pola Number
             modelBuilder.Entity<WmsCore.Models.Document>()
                 .Property(d => d.Number)
-                .HasMaxLength(9)
+                .HasMaxLength(12)
                 .IsRequired()
                 .ValueGeneratedOnAdd()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Save); //Wzięte z dokumentacji efcore, nie jest robione OUTPUT dla tego pola i będzie ono działało z trigerrami
 
-            // dodanie wirtualnej encji modelu do bazy danych która umożliwi łatwe odczytanie wyniku funkcji
-            modelBuilder.Entity<DocumentNumberResult>()
-                .HasNoKey()
-                .ToView(null); //Aby nie stworzyć tabeli 
         }
     }
 }

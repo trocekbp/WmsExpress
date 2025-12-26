@@ -1,0 +1,140 @@
+﻿@using WmsCore.Data
+@using WmsCore.ViewModels
+@model PaginatedList<ItemInventoryViewModel>
+
+@{
+    ViewData["Title"] = "Index";
+}
+<h1>Towary</h1>
+
+
+<form asp-action="Index" method="get" class="form-inline mb-3">
+    <p class="mb-0">
+        <!-- Pole wyszukiwania -->
+        <label class="mr-2">
+            Szukana nazwa:
+            <input type="text"
+                   name="searchString"
+                   value="@(ViewData["CurrentFilter"] ?? "")"
+                   class="form-control form-control-sm ml-1"
+                   style="width: 200px;" />
+        </label>
+
+        <!-- Dropdown kategorii -->
+        <label class="ml-3 mr-2">
+            kategoria:
+            <select name="categoryId"
+                    id="categoryId"
+                    class="form-control form-control-sm ml-1"
+                    style="width: 180px;">
+                <option value="">Wszystkie</option>
+                @foreach (SelectListItem cat in (SelectList)ViewData["CategoryList"])
+                {
+                    <option value="@cat.Value" selected="@(cat.Selected ? "selected" : null)">
+                        @cat.Text
+                    </option>
+                }
+            </select>
+        </label>
+        <!-- Wybór daty -->
+        <label class="mr-2">
+            Magazyn na dzień:
+            <input type="date"
+                   name="date"
+                   value="@(ViewData["Date"] != null
+                                   ? ((DateTime)ViewData["Date"]).ToString("yyyy-MM-dd")
+                                   : DateTime.UtcNow.ToString("yyyy-MM-dd"))"
+                   class="form-control form-control-sm ml-1"
+                   />
+        </label>
+
+
+        <button type="submit" class="btn btn-default">Szukaj</button>   |
+        <a asp-action="Index">Wyczyść</a>
+    </p>
+</form>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["CodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Code</a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Item.Acronym)
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Name</a>
+            </th>
+            <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Price</a>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Item.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Item.EAN)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].Item.Category)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].TotalQuantity)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var vm in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.Acronym)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.Price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.EAN)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => vm.Item.Category.CategoryId)
+                </td>
+                <td class="@(vm.TotalQuantity > 0 ? "bg-success bg-opacity-10 text-success fw-semibold" : "")">
+                    @vm.TotalQuantity
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@vm.Item.ItemId">Details</a> |
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex - 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index"
+   asp-route-sortOrder="@ViewData["CurrentSort"]"
+   asp-route-pageNumber="@(Model.PageIndex + 1)"
+   asp-route-currentFilter="@ViewData["CurrentFilter"]"
+   class="btn btn-default @nextDisabled">
+    Next
+</a>
