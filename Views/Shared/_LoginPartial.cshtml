@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using WmsCore.Models
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<ul class="navbar-nav ms-auto align-items-center">
+@if (SignInManager.IsSignedIn(User))
+{
+        <li class="nav-item me-4">
+            [@User.Identity.Name]
+        </li>
+    <li class="nav-item">
+   <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+       @Html.AntiForgeryToken()
+       <button type="submit" class="btn btn-link nav-link text-dark p-0">Wyloguj</button>
+   </form>
+    </li>
+}
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">
+                Logowanie
+            </a>
+        </li>
+    }
+</ul>

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using WmsCore.Models;
 
 namespace WmsCore.Data
 {
-    public class WmsCoreContext : DbContext
+    public class WmsCoreContext : IdentityDbContext<User>
     {
         public WmsCoreContext(DbContextOptions<WmsCoreContext> options)
             : base(options)
@@ -29,6 +30,8 @@ namespace WmsCore.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Itemu 
                 .Entity<Item>()
                 .HasMany(i => i.Attributes)
