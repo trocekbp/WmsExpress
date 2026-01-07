@@ -158,7 +158,7 @@ namespace Music_Store_Warehouse_App.Views
                 return View(item);
             }
 
-            // Jeżeli użytkownik wcisnął „Zapisz instrument”
+            // Jeżeli użytkownik wcisnął „Zapisz artykuł”
             else if (action == "Save")
             {
                 // Przypisz z POST-a listę cech (może być pusta, jeżeli nie było tabeli)
@@ -179,6 +179,7 @@ namespace Music_Store_Warehouse_App.Views
                     return View(item);
                 }
 
+                
                 // Jeśli ModelState jest OK – zapisujemy do bazy:
                 _context.Add(item);
                 await _context.SaveChangesAsync();

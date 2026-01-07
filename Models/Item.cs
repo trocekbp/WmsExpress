@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Serialization;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WmsCore.Models
 {
@@ -25,12 +26,10 @@ namespace WmsCore.Models
 
         [DisplayName("Cena")]
         [Required(ErrorMessage = "Cena jest wymagana")]
-        //[RegularExpression(@"^\d+([.,]\d{1,2})?$",
-        //    ErrorMessage = "Podaj cenę w formacie walutowym")]
-        [DataType(DataType.Currency, ErrorMessage = "Podaj cenę w odpowiednim formacie")]
+        [Column(TypeName = "decimal(18, 2)")] //System samoistnie będzie cenę zaokrąglał od 5 w górę
         public decimal Price { get; set; }
         [DisplayName("Opis")]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         // Kod kreskowy – do skanowania lub importu z producenta
         [DisplayName("Kod ean")]

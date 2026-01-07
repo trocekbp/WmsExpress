@@ -27,7 +27,13 @@ builder.Services.AddRazorPages();
 
 var app = builder.Build();
 
- await SeedService.SeedDatabase(app.Services);
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture("pl-PL")
+    .AddSupportedUICultures("pl-PL");
+
+app.UseRequestLocalization(localizationOptions);
+
+await SeedService.SeedDatabase(app.Services);
 
 
 // Configure the HTTP request pipeline.
