@@ -16,7 +16,6 @@ namespace WmsCore.Models
         [StringLength(30)]
         public string Code { get; set; }
 
-
         [DisplayName("Akronim")]
         [StringLength(30)]
         public string Acronym { get; set; }
@@ -26,9 +25,9 @@ namespace WmsCore.Models
 
         [DisplayName("Cena")]
         [Required(ErrorMessage = "Cena jest wymagana")]
-        [RegularExpression(@"^\d+([.,]\d{1,2})?$",
-            ErrorMessage = "Podaj cenę w formacie walutowym")]
-        [DataType(DataType.Currency, ErrorMessage = "Podaj cenę w formacie walutowym")]
+        //[RegularExpression(@"^\d+([.,]\d{1,2})?$",
+        //    ErrorMessage = "Podaj cenę w formacie walutowym")]
+        [DataType(DataType.Currency, ErrorMessage = "Podaj cenę w odpowiednim formacie")]
         public decimal Price { get; set; }
         [DisplayName("Opis")]
         public string Description { get; set; }

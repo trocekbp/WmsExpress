@@ -39,7 +39,6 @@ namespace WmsCore.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
-
             ModelState.AddModelError(string.Empty, "Nieudana próba logowania");
             return View(model);
         }

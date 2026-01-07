@@ -54,7 +54,26 @@ namespace Music_Store_Warehouse_App.Controllers
         // GET: Documents/Create
         public IActionResult Create(DocumentType? type)
         {
-            ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name");
+            if (type == null)
+            {
+                throw new InvalidOperationException("Nie przekazano typu dokumentu");
+
+            }
+
+            //Podział ze względu na dostawców i odbiorców
+            if (type == DocumentType.PZ || type == DocumentType.PW)
+            {
+                ViewData["ContractorId"] = new SelectList(_context.Contractor.Where(i => i.IsContractor), "ContractorId", "Name");
+            }
+            else if (type == DocumentType.WZ || type == DocumentType.RW)
+            {
+                ViewData["ContractorId"] = new SelectList(_context.Contractor.Where(i => i.IsCustomer), "ContractorId", "Name");
+            }
+            else {
+                ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name");
+            }
+
+               
             ViewBag.Type = type;
             var document = new Document(); //inicjalizacja i przekazanie daty wystawienia
             return View(document);
