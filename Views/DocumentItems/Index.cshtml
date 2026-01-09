@@ -3,8 +3,8 @@
 
 @{
     ViewData["Title"] = "Index";
-    var selectedIds = Model.SelectedItems as List<int> ?? new List<int>();
-    var visibleItems = Model.Items.Select(i => i.ItemId);
+    var selectedIds = Model.SelectedArticles as List<int> ?? new List<int>();
+    var visibleItems = Model.Articles.Select(i => i.ArticleId);
     var hiddenItems = selectedIds.Except(visibleItems);
 }
 <h1> Wybór pozycji dokumentu </h1>
@@ -58,9 +58,6 @@
                         </button>
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Items[0].Acronym)
-                    </th>
-                    <th>
                         <button type="submit"
                                 name="SortOrder"
                                 value="@ViewData["NameSortParam"]"
@@ -77,13 +74,13 @@
                         </button>
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Items[0].Description)
+                        @Html.DisplayNameFor(model => model.Articles[0].Description)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Items[0].EAN)
+                        @Html.DisplayNameFor(model => model.Articles[0].EAN)
                     </th>
                     <th>
-                        @Html.DisplayNameFor(model => model.Items[0].Category)
+                        @Html.DisplayNameFor(model => model.Articles[0].Category)
                     </th>
                     <th>
                         Zaznacz
@@ -91,20 +88,17 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var item in Model.Items)
+                @foreach (var item in Model.Articles)
                 {
                     <tr>
                         <td>
                             @Html.DisplayFor(modelItem => item.Code)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Acronym)
-                        </td>
-                        <td>
                             @Html.DisplayFor(modelItem => item.Name)
                         </td>
                         <td>
-                            @Html.DisplayFor(modelItem => item.Price)
+                            @Html.DisplayFor(modelItem => item.NetPrice)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.Description)
@@ -118,9 +112,9 @@
                         <td>
                             <input type="checkbox"
                                    class="big-checkbox"
-                                   name="SelectedItems"
-                                   value="@item.ItemId"
-                                   @(Model.SelectedItems.Contains(item.ItemId) ? "checked" : "") />
+                                   name="SelectedArticles"
+                                   value="@item.ArticleId"
+                                   @(Model.SelectedArticles.Contains(item.ArticleId) ? "checked" : "") />
                         </td>
                     </tr>
                 }
@@ -132,23 +126,23 @@
         <!-- Obsługa zapamiętywania zaznaczonych wcześniej pozycji-->
         @foreach (var id in hiddenItems)
         {
-            <input type="hidden" name="SelectedItems" value="@id" />
+            <input type="hidden" name="SelectedArticles" value="@id" />
         }
 
         @{
-            var prevDisabled = !Model.Items.HasPreviousPage ? "disabled" : "";
-            var nextDisabled = !Model.Items.HasNextPage ? "disabled" : "";
+            var prevDisabled = !Model.Articles.HasPreviousPage ? "disabled" : "";
+            var nextDisabled = !Model.Articles.HasNextPage ? "disabled" : "";
         }
         <div>
             <button type="submit"
                     name="pageNumber"
-                    value="@(Model.Items.PageIndex - 1)"
+                    value="@(Model.Articles.PageIndex - 1)"
                 class="btn btn-default @prevDisabled">
                 &lArr; Poprzednia
             </button>
             <button type="submit"
                     name="pageNumber"
-                    value="@(Model.Items.PageIndex + 1)"
+                    value="@(Model.Articles.PageIndex + 1)"
                 class="btn btn-default @nextDisabled">
                 Następna &rArr;
             </button>

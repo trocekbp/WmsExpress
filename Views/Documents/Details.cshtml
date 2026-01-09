@@ -60,11 +60,10 @@
     <thead>
         <tr>
             <th>Lp.</th>
-            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Item.Code)</th>
-            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Item.Acronym)</th>
-            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Item.Name)</th>
-            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Item.Price)</th>
-            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Item.Category.Name)</th>
+            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Article.Code)</th>
+            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Article.Name)</th>
+            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Article.NetPrice)</th>
+            <th>@Html.DisplayNameFor(m => m.DocumentItems.FirstOrDefault().Article.Category.Name)</th>
             <th>Ilość</th>
         </tr>
     </thead>
@@ -77,11 +76,10 @@
         {
             <tr>
                 <td>@i</td>
-                <td>@position.Item.Code</td>
-                <td>@position.Item.Acronym</td>
-                <td>@position.Item.Name</td>
-                <td>@position.Item.Price</td>
-                <td>@position.Item.Category.Name</td>
+                <td>@position.Article.Code</td>
+                <td>@position.Article.Name</td>
+                <td>@position.Article.NetPrice</td>
+                <td>@position.Article.Category.Name</td>
                 <td>@position.Quantity</td>
             </tr>
             i++;

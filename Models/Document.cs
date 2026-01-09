@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using WmsCore.Models.Enums;
+using WmsCore.Definitions;
 
 namespace WmsCore.Models
 {
@@ -18,7 +18,7 @@ namespace WmsCore.Models
 
         [Required(ErrorMessage = "Typ dokumentu jest wymagany")]
         [DisplayName("Typ")]
-        public DocumentType Type { get; set; }
+        public DocumentTypes Type { get; set; }
 
         [DataType(DataType.Date)]
         [DisplayName("Data wystawienia")]

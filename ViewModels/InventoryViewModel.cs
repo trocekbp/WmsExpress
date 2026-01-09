@@ -4,11 +4,11 @@ using WmsCore.Models;
 
 namespace WmsCore.ViewModels
 {
-    public class ItemInventoryViewModel
+    public class InventoryViewModel
     {
-        public Item Item { get; set; }
+        public Article Article{ get; set; }
 
         [DisplayName("Ilość")]
-        public int TotalQuantity { get; set; }
+        public decimal TotalQuantity { get; set; }
     }
 }

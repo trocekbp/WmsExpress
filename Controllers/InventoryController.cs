@@ -7,16 +7,16 @@ using WmsCore.ViewModels;
 
 namespace WmsCore.Controllers
 {
-    public class ItemInventoriesController : Controller
+    public class InventoryController : Controller
     {
         private readonly WmsCoreContext _context;
 
-        public ItemInventoriesController(WmsCoreContext context)
+        public InventoryController(WmsCoreContext context)
         {
             _context = context;
         }
 
-        // GET: ItemInventories
+        // GET: Inventories
         public async Task<IActionResult> Index(
             string sortOrder,
             string currentFilter,
@@ -51,7 +51,7 @@ namespace WmsCore.Controllers
             ViewData["CurrentCategory"] = categoryId; // by wiedzieć, która opcja ma być selected
             ViewData["Date"] = date;
 
-            IQueryable<Item> items = _context.Item
+            IQueryable<Article> items = _context.Article
                                                 .Include(i => i.Category)
                                                 .Include(i => i.InventoryMovements); //Dodajemy historię magazynową aby obliczyć obecną ilość
 
@@ -59,7 +59,7 @@ namespace WmsCore.Controllers
             if (!String.IsNullOrEmpty(searchString))
             {
                 items = items.Where(s =>
-                    s.Name.Contains(searchString) || s.Acronym.Contains(searchString));
+                    s.Name.Contains(searchString) || s.Code.Contains(searchString));
             }
 
             // --- Filtrowanie po kategorii, jeśli użytkownik wybrał categoryId ---
@@ -75,10 +75,10 @@ namespace WmsCore.Controllers
                     items = items.OrderByDescending(s => s.Name);
                     break;
                 case "Price":
-                    items = items.OrderBy(s => s.Price);
+                    items = items.OrderBy(s => s.NetPrice);
                     break;
                 case "price_desc":
-                    items = items.OrderByDescending(s => s.Price);
+                    items = items.OrderByDescending(s => s.NetPrice);
                     break;
                 default:
                     items = items.OrderBy(s => s.Name);
@@ -87,17 +87,17 @@ namespace WmsCore.Controllers
 
 
             //Rzutowanie listy towarów na listę ViewModel oraz obliczenie dla każdego artykułu ilości w magazynie
-            IQueryable<ItemInventoryViewModel> inventories = items.Select(i => new ItemInventoryViewModel()
+            IQueryable<InventoryViewModel> inventories = items.Select(i => new InventoryViewModel()
             {
-                Item = i,
+                Article = i,
                 TotalQuantity = i.InventoryMovements.Where(m => m.EffectiveDate <= date).Sum(m => m.QuantityChange)
             });
 
             int pageSize = 10;
-            return View(await PaginatedList<ItemInventoryViewModel>.CreateAsync(inventories.AsNoTracking(), pageNumber ?? 1, pageSize));
+            return View(await PaginatedList<InventoryViewModel>.CreateAsync(inventories.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
-        // GET: ItemInventories/Details/5
+        // GET: Inventories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -105,23 +105,23 @@ namespace WmsCore.Controllers
                 return NotFound();
             }
 
-            var item = await _context.Item
+            var article = await _context.Article
                 .Include(i => i.Category)
                 .Include(i => i.InventoryMovements)
                     .ThenInclude(m => m.Document)
                     .ThenInclude(d => d.Contractor)
                 .Include(i => i.Attributes)
                     .ThenInclude(ifeat => ifeat.AtrDefinition) // ThenInclude - jeszcze dołączamy definicje cech
-                .FirstOrDefaultAsync(m => m.ItemId == id);
+                .FirstOrDefaultAsync(m => m.ArticleId == id);
 
-            if (item == null)
+            if (article == null)
             {
                 return NotFound();
             }
 
-            var view_model = new ItemInventoryViewModel() { 
-            Item = item,
-            TotalQuantity = item.InventoryMovements.Sum(m => m.QuantityChange)
+            var view_model = new InventoryViewModel() { 
+            Article = article,
+            TotalQuantity = article.InventoryMovements.Sum(m => m.QuantityChange)
             };
             return View(view_model);
         }

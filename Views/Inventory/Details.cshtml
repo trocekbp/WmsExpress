@@ -1,4 +1,4 @@
-﻿@model WmsCore.ViewModels.ItemInventoryViewModel
+﻿@model WmsCore.ViewModels.InventoryViewModel
 
 @{
     ViewData["Title"] = "Details";
@@ -7,50 +7,44 @@
 <h1>Details</h1>
 
 <div>
-    <h4>Item</h4>
+    <h4>Artykuł</h4>
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.Code)
+            @Html.DisplayNameFor(model => model.Article.Code)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.Code)
+            @Html.DisplayFor(model => model.Article.Code)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.Acronym)
+            @Html.DisplayNameFor(model => model.Article.Name)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.Acronym)
+            @Html.DisplayFor(model => model.Article.Name)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.Name)
+            @Html.DisplayNameFor(model => model.Article.NetPrice)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.Name)
+            @Html.DisplayFor(model => model.Article.NetPrice)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.Price)
+            @Html.DisplayNameFor(model => model.Article.Description)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.Price)
+            @Html.DisplayFor(model => model.Article.Description)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.Description)
+            @Html.DisplayNameFor(model => model.Article.EAN)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.Description)
+            @Html.DisplayFor(model => model.Article.EAN)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.EAN)
+            @Html.DisplayNameFor(model => model.Article.Category)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.EAN)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Item.Category)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Item.Category.CategoryId)
+            @Html.DisplayFor(model => model.Article.Category.CategoryId)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.TotalQuantity)
@@ -84,7 +78,7 @@
         </thead>
         <tbody>
             @{
-                var history = Model.Item.InventoryMovements;
+                var history = Model.Article.InventoryMovements;
             }
             @foreach (var item in history)
             {

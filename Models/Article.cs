@@ -4,40 +4,44 @@ using Newtonsoft.Json.Serialization;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using WmsCore.Definitions;
 
 namespace WmsCore.Models
 {
-    [Index(nameof(Acronym), IsUnique = true)]
-    public class Item
+    [Index(nameof(Code), IsUnique = true)]
+    public class Article
     {
-        public int ItemId { get; set; }
+        public int ArticleId { get; set; }
 
         [DisplayName("Kod towaru")]
         [Required]
         [StringLength(30)]
         public string Code { get; set; }
 
-        [DisplayName("Akronim")]
-        [StringLength(30)]
-        public string Acronym { get; set; }
-
         [DisplayName("Nazwa")]
         public string Name { get; set; }
 
-        [DisplayName("Cena")]
+        [DisplayName("Netto")]
         [Required(ErrorMessage = "Cena jest wymagana")]
         [Column(TypeName = "decimal(18, 2)")] //System samoistnie będzie cenę zaokrąglał od 5 w górę
-        public decimal Price { get; set; }
+        public decimal NetPrice { get; set; }
+
+        [DisplayName("Brutto")]
+        [Column(TypeName = "decimal(18, 2)")] //System samoistnie będzie cenę zaokrąglał od 5 w górę
+        public decimal GrossPrice { get; set; }
+        [DisplayName("Stawka VAT")]
+        public string VatRate { get; set; } = VatRates.Stawka23;
         [DisplayName("Opis")]
         public string? Description { get; set; }
 
         // Kod kreskowy – do skanowania lub importu z producenta
         [DisplayName("Kod ean")]
-        // [RegularExpression(@"^\d{13}$", ErrorMessage = "EAN musi zawierać dokładnie 13 znaków")]
+        [RegularExpression(@"^\d{13}$", ErrorMessage = "EAN musi zawierać dokładnie 13 znaków")]
         public string? EAN { get; set; }
 
-        // Relacja do kategorii 
-        // [Required(ErrorMessage ="Kategoria jest wymagana")]
+        [Required(ErrorMessage = "Jednostka jest wymagana")]
+        public string Unit { get; set; } = Units.Sztuka;
+
         public int CategoryId { get; set; }
 
         [DisplayName("Kategoria")]

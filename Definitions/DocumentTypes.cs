@@ -1,6 +1,6 @@
-﻿namespace WmsCore.Models.Enums
+﻿namespace WmsCore.Definitions
 {
-    public enum DocumentType
+    public enum DocumentTypes
     {
         PZ, //Przyjęcie zewnętrzne
         WZ, //Wydanie zewnętrzne

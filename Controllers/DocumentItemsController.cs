@@ -8,8 +8,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WmsCore.Data;
+using WmsCore.Definitions;
 using WmsCore.Models;
-using WmsCore.Models.Enums;
 using WmsCore.ViewModels;
 
 namespace Music_Store_Warehouse_App.Controllers
@@ -51,50 +51,50 @@ namespace Music_Store_Warehouse_App.Controllers
             vm.CategoryList = new SelectList(categories, "CategoryId", "Name", vm.CategoryId);
 
 
-            IQueryable<Item> items = _context.Item
+            IQueryable<Article> articles = _context.Article
                                                 .Include(i => i.Category)
                                                 .Include(i => i.InventoryMovements);
 
             // --- Filtrowanie po wyszukiwanej frazie ---
             if (!String.IsNullOrEmpty(vm.SearchString))
             {
-                items = items.Where(s =>
-                    s.Name.Contains(vm.SearchString) || s.Acronym.Contains(vm.SearchString));
+                articles = articles.Where(s =>
+                    s.Name.Contains(vm.SearchString) || s.Code.Contains(vm.SearchString));
             }
 
             // --- Filtrowanie po kategorii, jeśli użytkownik wybrał categoryId ---
             if (vm.CategoryId.HasValue)
             {
-                items = items.Where(i => i.CategoryId == vm.CategoryId.Value);
+                articles = articles.Where(i => i.CategoryId == vm.CategoryId.Value);
             }
 
 
             switch (vm.SortOrder)
             {
                 case "code_desc":
-                    items = items.OrderByDescending(s => s.Code);
+                    articles = articles.OrderByDescending(s => s.Code);
                     break;
                 case "Name":
-                    items = items.OrderBy(s => s.Name);
+                    articles = articles.OrderBy(s => s.Name);
                     break;
                 case "name_desc":
-                    items = items.OrderByDescending(s => s.Name);
+                    articles = articles.OrderByDescending(s => s.Name);
                     break;
                 case "Price":
-                    items = items.OrderBy(s => s.Price);
+                    articles = articles.OrderBy(s => s.NetPrice);
                     break;
                 case "price_desc":
-                    items = items.OrderByDescending(s => s.Price);
+                    articles = articles.OrderByDescending(s => s.NetPrice);
                     break;
                 default:
-                    items = items.OrderBy(s => s.Code);
+                    articles = articles.OrderBy(s => s.Code);
                     break;
             }
 
             int pageSize = 15;
 
-            var paginatedList = await PaginatedList<Item>.CreateAsync(items.AsNoTracking(), vm.PageNumber ?? 1, pageSize);
-            vm.Items = paginatedList;
+            var paginatedList = await PaginatedList<Article>.CreateAsync(articles.AsNoTracking(), vm.PageNumber ?? 1, pageSize);
+            vm.Articles = paginatedList;
             return View(vm);
         }
 
@@ -108,7 +108,7 @@ namespace Music_Store_Warehouse_App.Controllers
 
             var documentItem = await _context.DocumentItem
                 .Include(d => d.Document)
-                .Include(d => d.Item)
+                .Include(d => d.Article)
                 .FirstOrDefaultAsync(m => m.DocumentItemId == id);
             if (documentItem == null)
             {
@@ -121,7 +121,7 @@ namespace Music_Store_Warehouse_App.Controllers
         // GET: DocumentItems/Create
         public IActionResult Create(DocumentItemsViewModel vm)
         {
-            if (vm.SelectedItems == null || !vm.SelectedItems.Any())
+            if (vm.SelectedArticles == null || !vm.SelectedArticles.Any())
             {
                 TempData["ErrorMessage"] = "Musisz zaznaczyć przynajmniej jedną pozycję.";
                 return RedirectToAction("Index", new
@@ -130,16 +130,16 @@ namespace Music_Store_Warehouse_App.Controllers
                     DocumentType = vm.DocumentType
                 }); // brak wybranych pozycji
             }
-            var itemsFromDb = _context.Item
-                .Where(i => vm.SelectedItems.Contains(i.ItemId))
+            var itemsFromDb = _context.Article
+                .Where(i => vm.SelectedArticles.Contains(i.ArticleId))
                 .Include(i => i.Category)
                 .ToList();
 
             var documentItems = itemsFromDb.Select(i => new DocumentItem
             {
                 DocumentId = vm.DocumentId,
-                ItemId = i.ItemId,
-                Item = i,
+                ArticleId = i.ArticleId,
+                Article = i,
             }).ToList();
 
             return View(documentItems);
@@ -152,16 +152,16 @@ namespace Music_Store_Warehouse_App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(List<DocumentItem> documentItems)
         {
-            var selectedIds = documentItems.Select(di => di.ItemId).ToList();
-            var itemsFromDb = _context.Item
-            .Where(i => selectedIds.Contains(i.ItemId))
+            var selectedIds = documentItems.Select(di => di.ArticleId).ToList();
+            var itemsFromDb = _context.Article
+            .Where(i => selectedIds.Contains(i.ArticleId))
             .Include(i => i.Category)
             .ToList();
 
             //przypisanie obiektów w liście documentsItem na podstawie ich ID ponieważ wysłane żądanie zawiera samo ID bez encji
             foreach (var di in documentItems)
             {
-                di.Item = itemsFromDb.First(i => i.ItemId == di.ItemId);
+                di.Article = itemsFromDb.First(i => i.ArticleId == di.ArticleId);
             }
 
             if (!ModelState.IsValid)
@@ -211,7 +211,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 return NotFound();
             }
             ViewData["DocumentId"] = new SelectList(_context.Document, "DocumentId", "DocumentId", documentItem.DocumentId);
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Code", documentItem.ItemId);
+            ViewData["ArticleId"] = new SelectList(_context.Article, "ArticleId", "Code", documentItem.ArticleId);
             return View(documentItem);
         }
 
@@ -220,7 +220,7 @@ namespace Music_Store_Warehouse_App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DocumentItemId,DocumentId,ItemId,Quantity,UnitOfMeasure")] DocumentItem documentItem)
+        public async Task<IActionResult> Edit(int id, [Bind("DocumentItemId,DocumentId,ArticleId,Quantity,UnitOfMeasure")] DocumentItem documentItem)
         {
             if (id != documentItem.DocumentItemId)
             {
@@ -248,7 +248,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DocumentId"] = new SelectList(_context.Document, "DocumentId", "DocumentId", documentItem.DocumentId);
-            ViewData["ItemId"] = new SelectList(_context.Item, "ItemId", "Code", documentItem.ItemId);
+            ViewData["ArticleId"] = new SelectList(_context.Article, "ArticleId", "Code", documentItem.ArticleId);
             return View(documentItem);
         }
 
@@ -262,7 +262,7 @@ namespace Music_Store_Warehouse_App.Controllers
 
             var documentItem = await _context.DocumentItem
                 .Include(d => d.Document)
-                .Include(d => d.Item)
+                .Include(d => d.Article)
                 .FirstOrDefaultAsync(m => m.DocumentItemId == id);
             if (documentItem == null)
             {
@@ -289,20 +289,20 @@ namespace Music_Store_Warehouse_App.Controllers
         #region Aktualizacje stanów magazynowych
         private async Task UpdateInventoryAsync(WmsCore.Models.Document document, List<DocumentItem> documentItems)
         {
-            var selectedIds = documentItems.Select(i => i.ItemId);
+            var selectedIds = documentItems.Select(i => i.ArticleId);
 
             //Pobranie istniejących zapisów stanów pozycji
             var movements = await _context.InventoryMovement
-                            .Where(i => selectedIds.Contains(i.ItemId))
+                            .Where(i => selectedIds.Contains(i.ArticleId))
                             .ToListAsync();
 
 
 
-            if (document.Type.Equals(DocumentType.PZ) || document.Type.Equals(DocumentType.PW))
+            if (document.Type.Equals(DocumentTypes.PZ) || document.Type.Equals(DocumentTypes.PW))
             {
                 ApplyPZPWInventory(document, documentItems);
             }
-            else if (document.Type.Equals(DocumentType.WZ) || document.Type.Equals(DocumentType.RW))
+            else if (document.Type.Equals(DocumentTypes.WZ) || document.Type.Equals(DocumentTypes.RW))
             {
                 try
                 {
@@ -329,7 +329,7 @@ namespace Music_Store_Warehouse_App.Controllers
             {
                 _context.Add(new InventoryMovement()
                 {
-                    Item = di.Item,
+                    Article = di.Article,
                     Document = document,
                     QuantityChange = di.Quantity,
                     EffectiveDate = document.OperationDate, //Data zaksięgowania
@@ -344,7 +344,7 @@ namespace Music_Store_Warehouse_App.Controllers
             //Wszystkie operacje magazynowe przed do dnia zaksięgowania dokumentu tak aby wiedzieć czy towary na pewno będą na stanie
             var grouped_mvm = movements
                         .Where(x => x.EffectiveDate <= document.OperationDate)
-                        .GroupBy(x => x.ItemId)
+                        .GroupBy(x => x.ArticleId)
                         .Select(group => new
                         {
                             ID = group.Key,
@@ -353,21 +353,21 @@ namespace Music_Store_Warehouse_App.Controllers
 
             foreach (var di in documentItems)
             {
-                var stock = grouped_mvm.Where(gr => gr.ID == di.ItemId).SingleOrDefault(); 
+                var stock = grouped_mvm.Where(gr => gr.ID == di.ArticleId).SingleOrDefault(); 
                 if (stock == null)
                 {
-                    throw new InvalidOperationException($"Brak artykułu [{di.Item.Code}] w magazynie");
+                    throw new InvalidOperationException($"Brak artykułu [{di.Article.Code}] w magazynie");
                 }
 
                 if (stock.AvailableStock < di.Quantity) 
                 {
-                    throw new InvalidOperationException($"Na magazynie nie ma wystarczającej ilości artykułu [{di.Item.Acronym}], pozostałe zasoby = {stock.AvailableStock} na dzień {document.OperationDate}");
+                    throw new InvalidOperationException($"Na magazynie nie ma wystarczającej ilości artykułu [{di.Article.Code}], pozostałe zasoby = {stock.AvailableStock} na dzień {document.OperationDate}");
                 }
 
                 //Ruch magazynowy wydający towary
 
                 _context.Add(new InventoryMovement() { 
-                    Item = di.Item,
+                    Article = di.Article,
                     Document = document,
                     QuantityChange = -di.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu
                     EffectiveDate = document.OperationDate //Wpływ na magazyn zgodnie z datą zaksięgowania dokumentu
@@ -383,7 +383,7 @@ namespace Music_Store_Warehouse_App.Controllers
         }
         private decimal calculateTotalVal(List<DocumentItem> items)
         {
-            var total = items.Sum(i => i.Item.Price * i.Quantity);
+            var total = items.Sum(i => i.Article.NetPrice * i.Quantity);
             return total;
 
         }

@@ -10,7 +10,7 @@ namespace WmsCore.Models
         [DisplayName("Nazwa kategorii")]
         public string Name { get; set; }
 
-        public ICollection<Item> Items { get; set; }
+        public ICollection<Article> Articles { get; set; }
     }
 
 }

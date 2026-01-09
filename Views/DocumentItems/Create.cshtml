@@ -14,13 +14,12 @@
     <table class="table">
         <thead>
             <tr>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.Code)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.Acronym)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.Name)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.Price)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.Description)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.EAN)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Item.Category.Name)</th>
+                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Code)</th>
+                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Name)</th>
+                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.NetPrice)</th>
+                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Description)</th>
+                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.EAN)</th>
+                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Category.Name)</th>
                 <th>Ilość</th>
             </tr>
         </thead>
@@ -29,22 +28,29 @@
             @for (int i = 0; i < Model.Count; i++)
             {
                 <tr>
-                    <td>@Model[i].Item.Code</td>
-                    <td>@Model[i].Item.Acronym</td>
-                    <td>@Model[i].Item.Name</td>
-                    <td>@Model[i].Item.Price</td>
-                    <td>@Model[i].Item.Description</td>
-                    <td>@Model[i].Item.EAN</td>
-                    <td>@Model[i].Item.Category.Name</td>
+                    <td>@Model[i].Article.Code</td>
+                    <td>@Model[i].Article.Name</td>
+                    <td>@Model[i].Article.NetPrice</td>
+                    <td>@Model[i].Article.Description</td>
+                    <td>@Model[i].Article.EAN</td>
+                    <td>@Model[i].Article.Category.Name</td>
 
                     <td>
-                        <input asp-for="@Model[i].Quantity" class="form-control" />
+                        @if (Model[i].Article.Unit != "szt.")
+                        {
+                            <input asp-for="@Model[i].Quantity" class="form-control" placeholder="000.1" />
+                        }
+                        else
+                        {
+                            <input asp-for="@Model[i].Quantity" class="form-control" />
+                        }
                         <span asp-validation-for="@Model[i].Quantity" class="text-danger"></span>
-
-                        <!-- WAZNE: ukryte pola -->
-                        <input asp-for="@Model[i].ItemId" type="hidden" />
-                        <input asp-for="@Model[i].DocumentId" type="hidden" />
                     </td>
+                    <td>@Model[i].Article.Unit</td>
+                    <!-- WAZNE: ukryte pola -->
+                    <input asp-for="@Model[i].ArticleId" type="hidden" />
+                    <input asp-for="@Model[i].DocumentId" type="hidden" />
+
                 </tr>
             }
         </tbody>
@@ -57,5 +63,7 @@
 
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

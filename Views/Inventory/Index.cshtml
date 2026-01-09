@@ -1,15 +1,12 @@
 ﻿@using WmsCore.Data
-@model PaginatedList<Item>
+@using WmsCore.ViewModels
+@model PaginatedList<InventoryViewModel>
 
 @{
     ViewData["Title"] = "Index";
 }
 <h1>Towary</h1>
 
-<p>
-<p>Dodaj towar</p>
-<a asp-action="Create" class="btn btn-sm btn-success">Dodaj</a>
-</p>
 
 <form asp-action="Index" method="get" class="form-inline mb-3">
     <p class="mb-0">
@@ -39,7 +36,19 @@
                 }
             </select>
         </label>
-      
+        <!-- Wybór daty -->
+        <label class="mr-2">
+            Magazyn na dzień:
+            <input type="date"
+                   name="date"
+                   value="@(ViewData["Date"] != null
+                                   ? ((DateTime)ViewData["Date"]).ToString("yyyy-MM-dd")
+                                   : DateTime.UtcNow.ToString("yyyy-MM-dd"))"
+                   class="form-control form-control-sm ml-1"
+                   />
+        </label>
+
+
         <button type="submit" class="btn btn-default">Szukaj</button>   |
         <a asp-action="Index">Wyczyść</a>
     </p>
@@ -53,57 +62,56 @@
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["CodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Code</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].Acronym)
-            </th>
-            <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Name</a>
             </th>
             <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Price</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].Description)
+                @Html.DisplayNameFor(model => model[0].Article.Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].EAN)
+                @Html.DisplayNameFor(model => model[0].Article.EAN)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].Category)
+                @Html.DisplayNameFor(model => model[0].Article.Category)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model[0].TotalQuantity)
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Code)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Acronym)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Price)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Description)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.EAN)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Category.CategoryId)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.ItemId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ItemId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ItemId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var vm in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelArticle => vm.Article.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelArticle => vm.Article.Name)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelArticle => vm.Article.NetPrice)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelArticle => vm.Article.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelArticle => vm.Article.EAN)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelArticle => vm.Article.Category.CategoryId)
+                </td>
+                <td class="@(vm.TotalQuantity > 0 ? "bg-success bg-opacity-10 text-success fw-semibold" : "")">
+                    @vm.TotalQuantity
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@vm.Article.ArticleId">Details</a> |
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 @{

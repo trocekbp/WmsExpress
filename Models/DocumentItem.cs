@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
-using WmsCore.Models.Enums;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Reflection.Metadata;
 
 namespace WmsCore.Models
@@ -15,19 +15,17 @@ namespace WmsCore.Models
         [ValidateNever]
         public Document Document { get; set; }
 
-        public int ItemId { get; set; }
+        public int ArticleId { get; set; }
 
         [ValidateNever]
-        public Item Item { get; set; }
+        public Article Article { get; set; }
 
         [DisplayName("Ilość")]
 
         [Required(ErrorMessage = "Ilość jest wymagana")]
-        [Range(0, int.MaxValue, ErrorMessage = "Ilość nie może być ujemna")]
-        public int Quantity { get; set; }           // ilość przyjęta / wydana
-
-        [Required(ErrorMessage = "Jednostka jest wymagana")]
-        public string UnitOfMeasure { get; set; } = "szt.";
+        [Range(0.0001, (double)decimal.MaxValue, ErrorMessage = "Ilość nie może być ujemna")]
+        [Column(TypeName = "decimal(18, 4)")]
+        public decimal Quantity { get; set; }   // ilość przyjęta / wydana
 
     }
 }

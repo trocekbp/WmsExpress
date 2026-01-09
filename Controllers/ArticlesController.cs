@@ -7,21 +7,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WmsCore.Data;
+using WmsCore.Definitions;
 using WmsCore.Models;
 
 namespace Music_Store_Warehouse_App.Views
 {
-    public class ItemsController : Controller
+    public class ArticlesController : Controller
     {
         private readonly WmsCoreContext _context;
 
-        public ItemsController(WmsCoreContext context)
+        public ArticlesController(WmsCoreContext context)
         {
             _context = context;
         }
 
-        // GET: Items
-        // GET: Items
+        // GET: Articles
         public async Task<IActionResult> Index(
             string sortOrder,
             string currentFilter,
@@ -52,44 +52,44 @@ namespace Music_Store_Warehouse_App.Views
             ViewData["CurrentCategory"] = categoryId; // by wiedzieć, która opcja ma być selected
 
 
-            IQueryable<Item> items = _context.Item
+            IQueryable<Article> articles = _context.Article
                                                 .Include(i => i.Category);
 
             // --- Filtrowanie po wyszukiwanej frazie ---
             if (!String.IsNullOrEmpty(searchString))
             {
-                items = items.Where(s =>
-                    s.Name.Contains(searchString) || s.Acronym.Contains(searchString));
+                articles = articles.Where(s =>
+                    s.Name.Contains(searchString) || s.Code.Contains(searchString));
             }
 
             // --- Filtrowanie po kategorii, jeśli użytkownik wybrał categoryId ---
             if (categoryId.HasValue)
             {
-                items = items.Where(i => i.CategoryId == categoryId.Value);
+                articles = articles.Where(i => i.CategoryId == categoryId.Value);
             }
 
 
             switch (sortOrder)
             {
                 case "name_desc":
-                    items = items.OrderByDescending(s => s.Name);
+                    articles = articles.OrderByDescending(s => s.Name);
                     break;
                 case "Price":
-                    items = items.OrderBy(s => s.Price);
+                    articles = articles.OrderBy(s => s.NetPrice);
                     break;
                 case "price_desc":
-                    items = items.OrderByDescending(s => s.Price);
+                    articles = articles.OrderByDescending(s => s.NetPrice);
                     break;
                 default:
-                    items = items.OrderBy(s => s.Name);
+                    articles = articles.OrderBy(s => s.Name);
                     break;
             }
 
             int pageSize = 10;
-            return View(await PaginatedList<Item>.CreateAsync(items.AsNoTracking(), pageNumber ?? 1, pageSize));
+            return View(await PaginatedList<Article>.CreateAsync(articles.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
-        // GET: itemss/Details/5
+        // GET: articles/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -97,36 +97,37 @@ namespace Music_Store_Warehouse_App.Views
                 return NotFound();
             }
 
-            var items = await _context.Item
+            var articles = await _context.Article
                 .Include(i => i.Category)
                 .Include(i => i.InventoryMovements)
                 .Include(i => i.Attributes)
                     .ThenInclude(ifeat => ifeat.AtrDefinition) // ThenInclude - jeszcze dołączamy definicje cech
-                .FirstOrDefaultAsync(m => m.ItemId == id);
+                .FirstOrDefaultAsync(m => m.ArticleId == id);
 
-            if (items == null)
+            if (articles == null)
             {
                 return NotFound();
             }
 
-            return View(items);
+            return View(articles);
         }
 
       
 
-        // GET: Items/Create
+        // GET: Articles/Create
         public IActionResult Create()
         {
             ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryId");
+            ViewData["VatRate"] = VatRates.GetSymbols();
             return View();
         }
 
-        // POST: Items/Create
+        // POST: Articles/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ItemId,Code,Acronym,Name,Price,Description,EAN,CategoryId")] Item item, string action,  // "ShowAttributess" lub "SaveInstrument"
+        public async Task<IActionResult> Create([Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Description,EAN,CategoryId")] Article article, string action,  // "ShowAttributess" lub "SaveInstrument"
             [FromForm] IList<WmsCore.Models.Attribute> Attributes)
         {
             // Zawsze przygotowujemy ViewBag dropdownów, bo widok ich potrzebuje
@@ -136,14 +137,14 @@ namespace Music_Store_Warehouse_App.Views
             if (action == "ShowAttributes")
             {
                 // Upewnijmy się, że wybrano kategorię
-                if (item.CategoryId == 0)
+                if (article.CategoryId == 0)
                 {
-                    ModelState.AddModelError(nameof(item.CategoryId), "Kategoria jest wymagana, aby wyświetlić cechy.");
+                    ModelState.AddModelError(nameof(article.CategoryId), "Kategoria jest wymagana, aby wyświetlić cechy.");
                 }
                 else
                 {
                     // Jeżeli jest wartość CategoryId, ładujemy od razu cechy dla danej grupy towarów
-                    var cat = _context.Category.Find(item.CategoryId);
+                    var cat = _context.Category.Find(article.CategoryId);
                     if (cat != null)
                     {
                         var type = cat.Name;
@@ -155,7 +156,7 @@ namespace Music_Store_Warehouse_App.Views
 
                 // Zwracamy widok z aktualnym modelem, nawet jeśli np. Name lub Price są puste.
 
-                return View(item);
+                return View(article);
             }
 
             // Jeżeli użytkownik wcisnął „Zapisz artykuł”
@@ -164,30 +165,31 @@ namespace Music_Store_Warehouse_App.Views
                 // Przypisz z POST-a listę cech (może być pusta, jeżeli nie było tabeli)
                // item.Attributes = Attributes;
 
-                // Teraz wykonujemy normalną walidację całego modelu
                 if (!ModelState.IsValid)
                 {
                     // Aby tabela cech nie zniknęła, musimy znów załadować AttributesDefinitions
-                    if (item.CategoryId != 0)
+                    if (article.CategoryId != 0)
                     {
-                        var cat = _context.Category.Find(item.CategoryId);
+                        var cat = _context.Category.Find(article.CategoryId);
                         var type = cat.Name;
                         ViewBag.AttributesDefinitions = _context.AtrDefinition
                             .Where(a => a.AttributeGroup.Name == type)
                             .ToList();
                     }
-                    return View(item);
+                    return View(article);
                 }
 
-                
+
+
+                //Obliczenie brutto
+                article.GrossPrice = article.NetPrice * (1 + VatRates.GetMultiplier(article.VatRate));
                 // Jeśli ModelState jest OK – zapisujemy do bazy:
-                _context.Add(item);
+                _context.Add(article);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
 
-            // Jeśli action nie został przekazany (lub ma nietypową wartość), po prostu wyświetlamy formularz
-            return View(item);
+            return View(article);
         }
 
 
@@ -201,7 +203,7 @@ namespace Music_Store_Warehouse_App.Views
         }
 
 
-        // GET: Items/Edit/5
+        // GET: Articles/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -209,11 +211,11 @@ namespace Music_Store_Warehouse_App.Views
                 return NotFound();
             }
 
-            var item = await _context.Item
+            var item = await _context.Article
                 .Include(i => i.Category)
                 .Include(i => i.Attributes)
                     .ThenInclude(atr => atr.AtrDefinition)
-                .FirstOrDefaultAsync(i => i.ItemId == id);
+                .FirstOrDefaultAsync(i => i.ArticleId == id);
 
             if (item == null)
             {
@@ -224,14 +226,14 @@ namespace Music_Store_Warehouse_App.Views
             return View(item);
         }
 
-        // POST: Items/Edit/5
+        // POST: Articles/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ItemId,Code,Acronym,Name,Price,Description,EAN,CategoryId")] Item item)
+        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Description,EAN,CategoryId")] Article article)
         {
-            if (id != item.ItemId)
+            if (id != article.ArticleId)
             {
                 return NotFound();
             }
@@ -240,12 +242,12 @@ namespace Music_Store_Warehouse_App.Views
             {
                 try
                 {
-                    _context.Update(item);
+                    _context.Update(article);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ItemExists(item.ItemId))
+                    if (!await ArticleExistsAsync(article.ArticleId))
                     {
                         return NotFound();
                     }
@@ -256,11 +258,11 @@ namespace Music_Store_Warehouse_App.Views
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryId", item.CategoryId);
-            return View(item);
+            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryId", article.CategoryId);
+            return View(article);
         }
 
-        // GET: Items/Delete/5
+        // GET: Articles/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -268,9 +270,9 @@ namespace Music_Store_Warehouse_App.Views
                 return NotFound();
             }
 
-            var item = await _context.Item
+            var item = await _context.Article
                 .Include(i => i.Category)
-                .FirstOrDefaultAsync(m => m.ItemId == id);
+                .FirstOrDefaultAsync(m => m.ArticleId == id);
             if (item == null)
             {
                 return NotFound();
@@ -279,24 +281,24 @@ namespace Music_Store_Warehouse_App.Views
             return View(item);
         }
 
-        // POST: Items/Delete/5
+        // POST: Articles/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var item = await _context.Item.FindAsync(id);
+            var item = await _context.Article.FindAsync(id);
             if (item != null)
             {
-                _context.Item.Remove(item);
+                _context.Article.Remove(item);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ItemExists(int id)
+        private async Task<bool> ArticleExistsAsync(int id)
         {
-            return _context.Item.Any(e => e.ItemId == id);
+            return await _context.Article.AnyAsync(e => e.ArticleId == id);
         }
     }
 }

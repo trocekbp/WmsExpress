@@ -18,7 +18,7 @@ namespace WmsCore.Data
         {
         }
 
-        public DbSet<Item> Item { get; set; } = default!;
+        public DbSet<Article> Article { get; set; } = default!;
         public DbSet<Category> Category { get; set; } = default!;
         public DbSet<Contractor> Contractor { get; set; } = default!;
         public DbSet<Address> Address { get; set; } = default!;
@@ -32,18 +32,18 @@ namespace WmsCore.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Itemu 
-                .Entity<Item>()
+            modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Articleu 
+                .Entity<Article>()
                 .HasMany(i => i.Attributes)
-                .WithOne(f => f.Item)
-                .HasForeignKey(f => f.ItemId)
+                .WithOne(f => f.Article)
+                .HasForeignKey(f => f.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Relacja jeden do jednego Itemu oraz Encji zapasu w magazynie
-            modelBuilder.Entity<Item>()
+            //Relacja jeden do jednego Articleu oraz Encji zapasu w magazynie
+            modelBuilder.Entity<Article>()
               .HasMany(i => i.InventoryMovements)
-              .WithOne(ii => ii.Item)
-              .HasForeignKey(m => m.ItemId)
+              .WithOne(ii => ii.Article)
+              .HasForeignKey(m => m.ArticleId)
             // usunięcie InventoryMovement nie skasuje Item:
             .OnDelete(DeleteBehavior.Restrict);
 

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WmsCore.Data;
 
@@ -11,9 +12,11 @@ using WmsCore.Data;
 namespace Music_Store_Warehouse_App.Migrations
 {
     [DbContext(typeof(WmsCoreContext))]
-    partial class WmsCoreContextModelSnapshot : ModelSnapshot
+    [Migration("20260108215806_ItemsModernizationToArticlesWithGrossPrice")]
+    partial class ItemsModernizationToArticlesWithGrossPrice
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,10 +220,6 @@ namespace Music_Store_Warehouse_App.Migrations
                     b.Property<decimal>("NetPrice")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("VatRate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -411,8 +410,12 @@ namespace Music_Store_Warehouse_App.Migrations
                     b.Property<int>("DocumentId")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18, 4)");
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UnitOfMeasure")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("DocumentItemId");
 
@@ -443,8 +446,8 @@ namespace Music_Store_Warehouse_App.Migrations
                     b.Property<DateTime>("EffectiveDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<decimal>("QuantityChange")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<int>("QuantityChange")
+                        .HasColumnType("int");
 
                     b.HasKey("InventoryMovementId");
 

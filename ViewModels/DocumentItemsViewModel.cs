@@ -6,8 +6,8 @@ namespace WmsCore.ViewModels
 {
     public class DocumentItemsViewModel
     {
-        public PaginatedList<Item> Items { get; set; }
-        public List<int> SelectedItems { get; set; } = new(); //wybrane pozycje
+        public PaginatedList<Article> Articles { get; set; }
+        public List<int> SelectedArticles { get; set; } = new(); //wybrane pozycje
 
         //Dokument
         public int DocumentId { get; set; }

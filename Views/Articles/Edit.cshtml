@@ -1,4 +1,4 @@
-﻿@model WmsCore.Models.Item
+﻿@model WmsCore.Models.Article
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,16 +12,11 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="ItemId" />
+            <input type="hidden" asp-for="ArticleId" />
             <div class="form-group">
                 <label asp-for="Code" class="control-label"></label>
                 <input asp-for="Code" class="form-control" />
                 <span asp-validation-for="Code" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Acronym" class="control-label"></label>
-                <input asp-for="Acronym" class="form-control" />
-                <span asp-validation-for="Acronym" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
@@ -29,9 +24,9 @@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Price" class="control-label"></label>
-                <input asp-for="Price" class="form-control" />
-                <span asp-validation-for="Price" class="text-danger"></span>
+                <label asp-for="NetPrice" class="control-label"></label>
+                <input asp-for="NetPrice" class="form-control" />
+                <span asp-validation-for="NetPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>

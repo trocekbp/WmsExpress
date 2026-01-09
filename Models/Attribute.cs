@@ -7,10 +7,10 @@ namespace WmsCore.Models
     {
         public int AttributeId { get; set; }
 
-        public int ItemId { get; set; }
+        public int ArticleId { get; set; }
 
         [ValidateNever]
-        public Item Item { get; set; }
+        public Article Article { get; set; }
 
         public int AtrDefinitionId { get; set; }
         [ValidateNever]

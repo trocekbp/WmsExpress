@@ -8,13 +8,13 @@ namespace WmsCore.Models
     {
         public int InventoryMovementId { get; set; }
 
-        public int ItemId { get; set; }
-        public Item Item { get; set; }
+        public int ArticleId { get; set; }
+        public Article Article { get; set; }
 
         public int DocumentId { get; set; }
         public Document Document { get; set; }
 
-        public int QuantityChange { get; set; } // + / -
+        public decimal QuantityChange { get; set; } // + / -
 
         public DateTime EffectiveDate { get; set; } = DateTime.UtcNow;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

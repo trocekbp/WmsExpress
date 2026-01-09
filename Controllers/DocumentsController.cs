@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WmsCore.Data;
+using WmsCore.Definitions;
 using WmsCore.Models;
-using WmsCore.Models.Enums;
 
 namespace Music_Store_Warehouse_App.Controllers
 {
@@ -40,7 +40,7 @@ namespace Music_Store_Warehouse_App.Controllers
             var document = await _context.Document
                 .Include(d => d.Contractor)
                 .Include(d => d.DocumentItems)
-                    .ThenInclude(di => di.Item)
+                    .ThenInclude(di => di.Article)
                         .ThenInclude(i => i.Category)
                 .FirstOrDefaultAsync(m => m.DocumentId == id);
             if (document == null)
@@ -52,7 +52,7 @@ namespace Music_Store_Warehouse_App.Controllers
         }
 
         // GET: Documents/Create
-        public IActionResult Create(DocumentType? type)
+        public IActionResult Create(DocumentTypes? type)
         {
             if (type == null)
             {
@@ -61,11 +61,11 @@ namespace Music_Store_Warehouse_App.Controllers
             }
 
             //Podział ze względu na dostawców i odbiorców
-            if (type == DocumentType.PZ || type == DocumentType.PW)
+            if (type == DocumentTypes.PZ || type == DocumentTypes.PW)
             {
                 ViewData["ContractorId"] = new SelectList(_context.Contractor.Where(i => i.IsContractor), "ContractorId", "Name");
             }
-            else if (type == DocumentType.WZ || type == DocumentType.RW)
+            else if (type == DocumentTypes.WZ || type == DocumentTypes.RW)
             {
                 ViewData["ContractorId"] = new SelectList(_context.Contractor.Where(i => i.IsCustomer), "ContractorId", "Name");
             }
@@ -196,7 +196,7 @@ namespace Music_Store_Warehouse_App.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<string> GenerateDocumentNumber(DateTime docDate, DocumentType docType) {
+        private async Task<string> GenerateDocumentNumber(DateTime docDate, DocumentTypes docType) {
 
             var sql = "SELECT dbo.fn_GenerateDocumentNumber(@dateParam, @typeParam)";
             string docNumber = string.Empty;
