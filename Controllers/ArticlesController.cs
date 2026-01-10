@@ -112,13 +112,19 @@ namespace Music_Store_Warehouse_App.Views
             return View(articles);
         }
 
-      
+
+        private void PrepareViewBags()
+        {
+            ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "CategoryId");
+            ViewBag.VatRates = new SelectList(VatRates.GetSymbols());
+            ViewBag.Units = new SelectList(Units.GetAllUnits());
+        }
+
 
         // GET: Articles/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryId");
-            ViewData["VatRate"] = VatRates.GetSymbols();
+            PrepareViewBags();
             return View();
         }
 
@@ -127,7 +133,7 @@ namespace Music_Store_Warehouse_App.Views
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Description,EAN,CategoryId")] Article article, string action,  // "ShowAttributess" lub "SaveInstrument"
+        public async Task<IActionResult> Create([Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId")] Article article, string action,  // "ShowAttributess" lub "SaveInstrument"
             [FromForm] IList<WmsCore.Models.Attribute> Attributes)
         {
             // Zawsze przygotowujemy ViewBag dropdownów, bo widok ich potrzebuje
@@ -179,8 +185,6 @@ namespace Music_Store_Warehouse_App.Views
                     return View(article);
                 }
 
-
-
                 //Obliczenie brutto
                 article.GrossPrice = article.NetPrice * (1 + VatRates.GetMultiplier(article.VatRate));
                 // Jeśli ModelState jest OK – zapisujemy do bazy:
@@ -190,16 +194,6 @@ namespace Music_Store_Warehouse_App.Views
             }
 
             return View(article);
-        }
-
-
-        private void PrepareViewBags()
-        {
-            ViewBag.SupplierList = new SelectList(
-                _context.Contractor, "ContractorId", "Name");
-
-            ViewData["CategoryId"] = new SelectList(
-                _context.Category, "CategoryId", "Name");
         }
 
 
@@ -231,7 +225,7 @@ namespace Music_Store_Warehouse_App.Views
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Description,EAN,CategoryId")] Article article)
+        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId")] Article article)
         {
             if (id != article.ArticleId)
             {
@@ -258,7 +252,9 @@ namespace Music_Store_Warehouse_App.Views
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryId", article.CategoryId);
+            ViewBag.VatRates = new SelectList(VatRates.GetSymbols());
+            ViewBag.Units = new SelectList(Units.GetAllUnits());
+            ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "CategoryId", article.CategoryId);
             return View(article);
         }
 
