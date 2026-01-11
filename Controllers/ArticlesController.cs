@@ -204,18 +204,18 @@ namespace Music_Store_Warehouse_App.Views
             {
                 return NotFound();
             }
-
             var item = await _context.Article
                 .Include(i => i.Category)
                 .Include(i => i.Attributes)
                     .ThenInclude(atr => atr.AtrDefinition)
+                .Include(i => i.InventoryMovements)
                 .FirstOrDefaultAsync(i => i.ArticleId == id);
 
             if (item == null)
             {
                 return NotFound();
             }
-            // ViewData["CategoryId"] = new SelectList(_context.Category, "CategoryId", "CategoryId", item.CategoryId);
+
             PrepareViewBags();
             return View(item);
         }
@@ -236,6 +236,14 @@ namespace Music_Store_Warehouse_App.Views
             {
                 try
                 {
+                    //Cena brutto jest zmieniana przez java script lecz w razie błędów kontroler sprawdza wartości
+                    //drugi raz:
+
+                    //Zmiana ceny brutto w razie zmiany stawki lub ceny netto
+                    var viewGrossPrice = article.NetPrice * (1 + VatRates.GetMultiplier(article.VatRate));
+                    if (viewGrossPrice != article.GrossPrice) {
+                        article.GrossPrice = viewGrossPrice;
+                    }
                     _context.Update(article);
                     await _context.SaveChangesAsync();
                 }

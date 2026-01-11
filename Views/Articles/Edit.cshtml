@@ -1,7 +1,11 @@
 ﻿@model WmsCore.Models.Article
 
 @{
+
+    
     ViewData["Title"] = "Edit";
+    //Jeśli istnieją ruchy magazynowe dla danego artykułu, nie można zmienić jednostki miary.
+    var movement = Model.InventoryMovements.FirstOrDefault();
 }
 
 <h1>Edit</h1>
@@ -11,6 +15,7 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
+            <input type="hidden" asp-for="ArticleId" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Code" class="control-label"></label>
@@ -32,9 +37,25 @@
                 <select asp-for="VatRate" class="form-control" asp-items="ViewBag.VatRates"></select>
             </div>
             <div class="form-group">
-                <label asp-for="Unit" class="control-label"></label>
-                <select asp-for="Unit" class="form-control" asp-items="ViewBag.Units"></select>
+                <label asp-for="GrossPrice" class="control-label"></label>
+                <input asp-for="GrossPrice" type="number" class="form-control" readonly/>
+                <span asp-validation-for="GrossPrice" class="text-danger"></span>
             </div>
+            @if(movement != null){
+                <div class="form-group">
+                    <label asp-for="Unit" class="control-label"></label>
+                    <input asp-for="Unit" class="form-control" readonly />
+                    <span class="text-warning">Nie można zmienić jednostki - artykuł jest już powiązany z dokumentami (załóż nowy podobny towar)</span>
+                </div>
+                }
+                else
+                {
+                <div class="form-group">
+                    <label asp-for="Unit" class="control-label"></label>
+                    <select asp-for="Unit" class="form-control" asp-items="ViewBag.Units"></select>
+                </div>
+                }
+                
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>
                 <input asp-for="Description" class="form-control" />
@@ -61,5 +82,44 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            const $netPriceInput = $('#NetPrice');
+            const $vatRateSelect = $('#VatRate');
+            const $grossPriceInput = $('#GrossPrice');
+
+            function calculateGrossPrice() {
+                const netPrice = parseFloat($netPriceInput.val().replace(',', '.'));
+                const vatValueRaw = $vatRateSelect.val();
+
+                if (isNaN(netPrice)) {
+                    $grossPriceInput.val('');
+                    return;
+                }
+
+                let vatPercent = 0;
+
+                // Logika wyciągania procentu ze stringów 
+                if (vatValueRaw.includes('%')) {
+                    vatPercent = parseInt(vatValueRaw.replace('%', '')) / 100;
+                } else {
+                    // Dla "ZW"  i "NP"  stawka wynosi 0%
+                    vatPercent = 0;
+                }
+
+                const grossPrice = netPrice * (1 + vatPercent);
+
+                $grossPriceInput.val(grossPrice.toFixed(2));
+            }
+
+            $netPriceInput.on('input change', calculateGrossPrice);
+            $vatRateSelect.on('change', calculateGrossPrice);
+
+            
+        });
+    </script>
 }

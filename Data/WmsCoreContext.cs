@@ -32,7 +32,7 @@ namespace WmsCore.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Articleu 
+            modelBuilder //kaskadowe usuwanie dzieci przy usunięciu rodzica, czyli atrybutów Article 
                 .Entity<Article>()
                 .HasMany(i => i.Attributes)
                 .WithOne(f => f.Article)
@@ -70,7 +70,6 @@ namespace WmsCore.Data
                 .IsRequired()
                 .ValueGeneratedOnAdd()
                 .Metadata.SetAfterSaveBehavior(PropertySaveBehavior.Save); //Wzięte z dokumentacji efcore, nie jest robione OUTPUT dla tego pola i będzie ono działało z trigerrami
-
         }
     }
 }

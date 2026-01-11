@@ -22,11 +22,12 @@ namespace WmsCore.Models
         public string Name { get; set; }
 
         [DisplayName("Netto")]
-        [Required(ErrorMessage = "Cena jest wymagana")]
+        [Required(ErrorMessage = "Cena netto jest wymagana")]
         [Column(TypeName = "decimal(18, 2)")] //System samoistnie będzie cenę zaokrąglał od 5 w górę
         public decimal NetPrice { get; set; }
 
         [DisplayName("Brutto")]
+        [Required(ErrorMessage = "Cena brutto jest wymagana")]
         [Column(TypeName = "decimal(18, 2)")] //System samoistnie będzie cenę zaokrąglał od 5 w górę
         public decimal GrossPrice { get; set; }
         [DisplayName("Stawka VAT")]
