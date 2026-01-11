@@ -16,6 +16,10 @@ namespace WmsCore.Models
         [ValidateNever]
         public string? Number { get; set; } //generowany za pomocą funkcji
 
+        [DisplayName("Numer faktury kosztowej")]
+        [ValidateNever]
+        public string? CostInvoiceNumber { get; set; } 
+
         [Required(ErrorMessage = "Typ dokumentu jest wymagany")]
         [DisplayName("Typ")]
         public DocumentTypes Type { get; set; }

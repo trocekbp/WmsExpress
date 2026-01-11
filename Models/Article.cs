@@ -40,6 +40,7 @@ namespace WmsCore.Models
         public string? EAN { get; set; }
 
         [Required(ErrorMessage = "Jednostka jest wymagana")]
+        [DisplayName("Jednostka")]
         public string Unit { get; set; } = Units.Sztuka;
 
         public int CategoryId { get; set; }

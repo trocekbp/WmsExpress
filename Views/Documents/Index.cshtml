@@ -52,6 +52,9 @@
                 @Html.DisplayNameFor(model => model.Number)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.CostInvoiceNumber)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Type)
             </th>
             <th>
@@ -77,6 +80,9 @@
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Number)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CostInvoiceNumber)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Type)

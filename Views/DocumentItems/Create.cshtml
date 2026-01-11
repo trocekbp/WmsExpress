@@ -38,11 +38,11 @@
                     <td>
                         @if (Model[i].Article.Unit != "szt.")
                         {
-                            <input asp-for="@Model[i].Quantity" class="form-control" placeholder="000.1" />
+                            <input asp-for="@Model[i].Quantity" type="number" class="form-control" step="1" placeholder="000.1" />
                         }
                         else
                         {
-                            <input asp-for="@Model[i].Quantity" class="form-control" />
+                            <input asp-for="@Model[i].Quantity" type="number" class="form-control" />
                         }
                         <span asp-validation-for="@Model[i].Quantity" class="text-danger"></span>
                     </td>
@@ -65,5 +65,7 @@
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <!-- WAŻNE umożliwa polskie formaty liczb czyli przecinek w liczbach zmiennoprzecinkowych-->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/localization/messages_pl.min.js"></script>
     }
 }
