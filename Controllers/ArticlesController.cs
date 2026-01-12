@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using WmsCore.Controllers;
 using WmsCore.Data;
 using WmsCore.Definitions;
 using WmsCore.Models;
 
 namespace Music_Store_Warehouse_App.Views
 {
-    public class ArticlesController : Controller
+    public class ArticlesController : BaseController
     {
         private readonly WmsCoreContext _context;
 
@@ -295,8 +296,19 @@ namespace Music_Store_Warehouse_App.Views
             {
                 _context.Article.Remove(item);
             }
-
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex) {
+                if (ex.InnerException != null && ex.InnerException.ToString().Contains("FK_InventoryMovement")) {
+                    NotifyError("Artykuł jest powiązany z dokumentami");
+                }
+                else {
+                    NotifyError(ex.Message + "\n Inner Exception: \n"+ ex.InnerException.ToString());
+                }
+                return View(item);
+            }
             return RedirectToAction(nameof(Index));
         }
 

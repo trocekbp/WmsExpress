@@ -1,0 +1,16 @@
+﻿@if (TempData["UserMessage"] != null)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const message = @Json.Serialize(TempData["UserMessage"]);
+
+            Swal.fire({
+                title: '@(TempData["MessageType"]?.ToString() == "success" ? "Sukces!" : "Błąd!")',
+                text: message,
+                icon: '@(TempData["MessageType"] ?? "error")',
+                confirmButtonColor: '#3085d6',
+                confirmButtonText: 'OK'
+            });
+        });
+    </script>
+}
