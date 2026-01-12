@@ -21,7 +21,7 @@
         public const string Milimetr = "mm";
 
         public static readonly List<string> unit_list = new List<string>() { 
-            Sztuka, Tona, Kilogram, Gram, Litr, Milimetr
+            Sztuka, Tona, Kilogram, Gram, Litr, Mililitr, M2, Metr, Centymetr, Milimetr
         };
 
         public static bool IsDecimal(string unit) {

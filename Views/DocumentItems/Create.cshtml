@@ -38,11 +38,11 @@
                     <td>
                         @if (Model[i].Article.Unit != "szt.")
                         {
-                            <input asp-for="@Model[i].Quantity" type="number" class="form-control" step="1" placeholder="000.1" />
+                            <input asp-for="@Model[i].Quantity" value="" type="number" class="form-control" placeholder="000.1" />
                         }
                         else
                         {
-                            <input asp-for="@Model[i].Quantity" type="number" class="form-control" />
+                            <input asp-for="@Model[i].Quantity" value="1" type="number" step="1" class="form-control" />
                         }
                         <span asp-validation-for="@Model[i].Quantity" class="text-danger"></span>
                     </td>
