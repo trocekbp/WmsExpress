@@ -6,7 +6,10 @@ using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pag
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using WmsCore.Controllers;
 using WmsCore.Data;
 using WmsCore.Definitions;
 using WmsCore.Models;
@@ -14,7 +17,7 @@ using WmsCore.ViewModels;
 
 namespace Music_Store_Warehouse_App.Controllers
 {
-    public class DocumentItemsController : Controller
+    public class DocumentItemsController : BaseController
     {
         private readonly WmsCoreContext _context;
 
@@ -264,6 +267,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 .Include(d => d.Document)
                 .Include(d => d.Article)
                 .FirstOrDefaultAsync(m => m.DocumentItemId == id);
+
             if (documentItem == null)
             {
                 return NotFound();
@@ -275,16 +279,33 @@ namespace Music_Store_Warehouse_App.Controllers
         // POST: DocumentItems/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, int docID)
         {
-            var documentItem = await _context.DocumentItem.FindAsync(id);
-            if (documentItem != null)
+            var documentItem = await _context.DocumentItem.Include(i => i.Document).FirstOrDefaultAsync();
+            if (documentItem == null)
             {
-                _context.DocumentItem.Remove(documentItem);
+                NotifyError("Nie udało się pobrać pozycji.");
+                return RedirectToAction("Edit", "Documents", new { id = docID });
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            var document = documentItem.Document;
+            try
+            {
+                await CorrectInventory(documentItem);
+                //Po pomyślnej korekcji stanów wiemy że ta ilość nie będzie zerowa
+                document.TotalValue -= documentItem.Quantity * documentItem.Article.NetPrice;
+
+                _context.DocumentItem.Remove(documentItem);
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                NotifyError(ex.Message);
+                return RedirectToAction("Edit", "Documents", new { id = docID });
+            };
+            NotifySuccess("Sukces");
+            return RedirectToAction("Edit", "Documents", new { id = docID });
         }
         #region Aktualizacje stanów magazynowych
         private async Task UpdateInventoryAsync(WmsCore.Models.Document document, List<DocumentItem> documentItems)
@@ -353,20 +374,21 @@ namespace Music_Store_Warehouse_App.Controllers
 
             foreach (var di in documentItems)
             {
-                var stock = grouped_mvm.Where(gr => gr.ID == di.ArticleId).SingleOrDefault(); 
+                var stock = grouped_mvm.Where(gr => gr.ID == di.ArticleId).SingleOrDefault();
                 if (stock == null)
                 {
                     throw new InvalidOperationException($"Brak artykułu [{di.Article.Code}] w magazynie");
                 }
 
-                if (stock.AvailableStock < di.Quantity) 
+                if (stock.AvailableStock < di.Quantity)
                 {
                     throw new InvalidOperationException($"Na magazynie nie ma wystarczającej ilości artykułu [{di.Article.Code}], pozostałe zasoby = {stock.AvailableStock} na dzień {document.OperationDate}");
                 }
 
                 //Ruch magazynowy wydający towary
 
-                _context.Add(new InventoryMovement() { 
+                _context.Add(new InventoryMovement()
+                {
                     Article = di.Article,
                     Document = document,
                     QuantityChange = -di.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu
@@ -377,11 +399,61 @@ namespace Music_Store_Warehouse_App.Controllers
         }
         #endregion
 
+        #region Aktualizacje stanów przy usunięciu pozycji dokumentu
+        //Wprowadzamy korygujący ruch magazynowy
+        //Nie dopuszczamy stanów ujemnych
+        private async Task CorrectInventory(DocumentItem documentItem)
+        {
+
+            //Pobranie istniejących zapisów stanów danej pozycji
+            var stock = await _context.InventoryMovement
+                            .Where(i => i.ArticleId == documentItem.ArticleId)
+                            .SumAsync(x => x.QuantityChange);
+
+            /*Sprawdzamy zatwierdzone i niezatwierdzone ruchy magazynowe czyli bez warunku   .Where(x => x.EffectiveDate <= DateTime.Now()).
+            ponieważ pozwala to uniknąc rozjechania się stanów w przyszłości, pozycje usuwamy teraz a kolejny dokument
+            zatwierdza się za kilka dni */
+            if (stock - documentItem.Quantity < 0)
+            {
+                throw new InvalidOperationException("Nie można wykonać operacji, blokada przed stanem ujemnym");
+            }
+
+            ApplyCorrection(documentItem);
+
+        }
+        #region Korekta stanów magazynowych
+        private void ApplyCorrection(DocumentItem documentItem)
+        {
+            var document = documentItem.Document;
+            if (document.Type.Equals(DocumentTypes.WZ) || document.Type.Equals(DocumentTypes.RW))
+            {
+                _context.Add(new InventoryMovement()
+                {
+                    Article = documentItem.Article,
+                    Document = documentItem.Document,
+                    QuantityChange = -documentItem.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu
+                    EffectiveDate = DateTime.Now //Wpływ na magazyn 
+                });
+            }
+            else
+            {
+                _context.Add(new InventoryMovement()
+                {
+                    Article = documentItem.Article,
+                    Document = documentItem.Document,
+                    QuantityChange = documentItem.Quantity, // PLUS ILOŚĆ
+                    EffectiveDate = DateTime.Now //Wpływ na magazyn 
+                });
+            }
+        }
+        #endregion
+
+        #endregion
         private bool DocumentItemExists(int id)
         {
             return _context.DocumentItem.Any(e => e.DocumentItemId == id);
         }
-        private decimal calculateTotalVal(List<DocumentItem> items)
+        private decimal CalculateTotalVal(List<DocumentItem> items)
         {
             var total = items.Sum(i => i.Article.NetPrice * i.Quantity);
             return total;

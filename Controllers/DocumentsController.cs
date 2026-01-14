@@ -117,7 +117,13 @@ namespace Music_Store_Warehouse_App.Controllers
                 return NotFound();
             }
 
-            var document = await _context.Document.FindAsync(id);
+            var document = await _context.Document
+                .Include(d => d.Contractor)
+                .Include(d => d.DocumentItems)
+                    .ThenInclude(di => di.Article)
+                        .ThenInclude(i => i.Category)
+                .FirstOrDefaultAsync(m => m.DocumentId == id);
+
             if (document == null)
             {
                 return NotFound();

@@ -5,9 +5,9 @@
     int i = 0;
 }
 
-<h1>Create</h1>
+<h1>Pozycje</h1>
 
-<h4>DocumentItem</h4>
+<h4>Ilości artykułów</h4>
 <hr />
 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 <form asp-action="Create">
@@ -17,7 +17,6 @@
                 <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Code)</th>
                 <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Name)</th>
                 <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.NetPrice)</th>
-                <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Description)</th>
                 <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.EAN)</th>
                 <th>@Html.DisplayNameFor(m => m.FirstOrDefault().Article.Category.Name)</th>
                 <th>Ilość</th>
@@ -31,7 +30,6 @@
                     <td>@Model[i].Article.Code</td>
                     <td>@Model[i].Article.Name</td>
                     <td>@Model[i].Article.NetPrice</td>
-                    <td>@Model[i].Article.Description</td>
                     <td>@Model[i].Article.EAN</td>
                     <td>@Model[i].Article.Category.Name</td>
 

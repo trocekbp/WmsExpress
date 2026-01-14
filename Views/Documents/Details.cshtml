@@ -2,7 +2,6 @@
 
 @{
     ViewData["Title"] = "Details";
-    int i = 0;
 }
 
 <h1>Details</h1>
@@ -76,7 +75,7 @@
 
     <tbody>
         @{
-            i++;
+            int i = 1;
         } 
         @foreach (var position in Model.DocumentItems) 
         {

@@ -13,7 +13,7 @@ namespace WmsCore.Models
     {
         public int ArticleId { get; set; }
 
-        [DisplayName("Kod towaru")]
+        [DisplayName("Kod artykułu")]
         [Required(ErrorMessage = "Kod artykułu jest wymagany")]
         [StringLength(30)]
         public string Code { get; set; }
