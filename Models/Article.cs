@@ -45,6 +45,7 @@ namespace WmsCore.Models
         [DisplayName("Jednostka")]
         public string Unit { get; set; } = Units.Sztuka;
 
+        [DisplayName("Kategoria")]
         public int CategoryId { get; set; }
 
         [DisplayName("Kategoria")]

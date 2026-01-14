@@ -117,7 +117,7 @@ namespace Music_Store_Warehouse_App.Views
 
         private void PrepareViewBags()
         {
-            ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "CategoryId");
+            ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "Name");
             ViewBag.VatRates = new SelectList(VatRates.GetSymbols());
             ViewBag.Units = new SelectList(Units.GetAllUnits());
         }
