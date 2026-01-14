@@ -194,7 +194,8 @@ namespace Music_Store_Warehouse_App.Controllers
 
             //Dodanie pozycji dokumentu oraz wyliczenie wartości dokumentu
             _context.DocumentItem.AddRange(documentItems);
-            document.TotalValue = CalculateTotalVal(documentItems);
+            document.TotalNetAmount = CalculateTotalNetValue(documentItems);
+            document.TotalGrossAmount = CalculateTotalGrossValue(documentItems);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Details", "Documents", new { id = docId });
@@ -293,7 +294,8 @@ namespace Music_Store_Warehouse_App.Controllers
             {
                 await CorrectInventory(documentItem);
                 //Po pomyślnej korekcji stanów wiemy że ta ilość nie będzie zerowa
-                document.TotalValue -= documentItem.Quantity * documentItem.Article.NetPrice;
+                document.TotalNetAmount -= documentItem.Quantity * documentItem.NetPrice;
+                document.TotalGrossAmount -= documentItem.Quantity * documentItem.GrossPrice;
 
                 _context.DocumentItem.Remove(documentItem);
 
@@ -453,9 +455,15 @@ namespace Music_Store_Warehouse_App.Controllers
         {
             return _context.DocumentItem.Any(e => e.DocumentItemId == id);
         }
-        private decimal CalculateTotalVal(List<DocumentItem> items)
+        private decimal CalculateTotalNetValue(List<DocumentItem> items)
         {
             var total = items.Sum(i => i.Article.NetPrice * i.Quantity);
+            return total;
+
+        }
+        private decimal CalculateTotalGrossValue(List<DocumentItem> items)
+        {
+            var total = items.Sum(i => i.Article.GrossPrice * i.Quantity);
             return total;
 
         }

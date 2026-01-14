@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using WmsCore.Definitions;
 
 namespace WmsCore.Models
@@ -34,8 +35,14 @@ namespace WmsCore.Models
 
         public DateTime CreationDate { get; set; } //Data utworzenia informacyjnie, wstawiana przez trigger
 
-        [DisplayName("Wartość")]
-        public decimal TotalValue { get; set; }
+        [DisplayName("Wartość netto")]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal TotalNetAmount { get; set; }
+
+        [DisplayName("Wartość Brutto")]
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal TotalGrossAmount { get; set; }
+
 
         [DisplayName("Opis")]
         public string? Description { get; set; }

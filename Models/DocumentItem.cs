@@ -27,5 +27,18 @@ namespace WmsCore.Models
         [Column(TypeName = "decimal(18, 4)")]
         public decimal Quantity { get; set; }   // ilość przyjęta / wydana
 
+        [DisplayName("Netto")]
+        [Required(ErrorMessage = "Cena netto jest wymagana")]
+        [Column(TypeName = "decimal(18, 2)")] 
+        public decimal NetPrice { get; set; }
+
+        [DisplayName("Brutto")]
+        [Required(ErrorMessage = "Cena brutto jest wymagana")]
+        [Column(TypeName = "decimal(18, 2)")] 
+
+        public decimal GrossPrice { get; set; }
+
+
+
     }
 }
