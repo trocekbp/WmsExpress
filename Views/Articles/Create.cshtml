@@ -24,12 +24,17 @@
             </div>
             <div class="form-group">
                 <label asp-for="NetPrice" class="control-label"></label>
-                <input asp-for="NetPrice" type="number" class="form-control" min="0"/>
+                <input asp-for="NetPrice" type="number" class="form-control" min="0" value="0.00"/>
                 <span asp-validation-for="NetPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="VatRate" class="control-label"></label>
                 <select asp-for="VatRate" class="form-control" asp-items="ViewBag.VatRates"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="GrossPrice" class="control-label"></label>
+                <input asp-for="GrossPrice" type="number" class="form-control" min="0" value="0.00" readonly />
+                <span asp-validation-for="GrossPrice" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Unit" class="control-label"></label>
@@ -64,4 +69,40 @@
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <!-- WAŻNE umożliwa polskie formaty liczb czyli przecinek w liczbach zmiennoprzecinkowych-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/localization/messages_pl.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            const $netPriceInput = $('#NetPrice');
+            const $vatRateSelect = $('#VatRate');
+            const $grossPriceInput = $('#GrossPrice');
+
+            function calculateGrossPrice() {
+                const netPrice = parseFloat($netPriceInput.val().replace(',', '.'));
+                const vatValueRaw = $vatRateSelect.val();
+
+                if (isNaN(netPrice)) {
+                    $grossPriceInput.val('');
+                    return;
+                }
+
+                let vatPercent = 0;
+
+                // Logika wyciągania procentu ze stringów
+                if (vatValueRaw.includes('%')) {
+                    vatPercent = parseInt(vatValueRaw.replace('%', '')) / 100;
+                } else {
+                    // Dla "ZW"  i "NP"  stawka wynosi 0%
+                    vatPercent = 0;
+                }
+
+                const grossPrice = netPrice * (1 + vatPercent);
+
+                $grossPriceInput.val(grossPrice.toFixed(2));
+            }
+
+            $netPriceInput.on('input change', calculateGrossPrice);
+            $vatRateSelect.on('change', calculateGrossPrice);
+
+
+        });
+    </script>
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WmsCore.Controllers;
 using WmsCore.Data;
@@ -186,11 +187,25 @@ namespace Music_Store_Warehouse_App.Views
                     return View(article);
                 }
 
-                //Obliczenie brutto
+                //Obliczenie brutto po stronie kontrolera
                 article.GrossPrice = article.NetPrice * (1 + VatRates.GetMultiplier(article.VatRate));
                 // Jeśli ModelState jest OK – zapisujemy do bazy:
                 _context.Add(article);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (Exception ex) {
+                    if (ex.InnerException != null && ex.InnerException.ToString().Contains("Article_Code"))
+                    {
+                        NotifyError("Kod artykułu musi być unikalny.");
+                    }
+                    else {
+                        NotifyError(ex.Message + "\n" + ex.InnerException.ToString());
+                    }
+                    return View(article);
+                }
+
                 return RedirectToAction(nameof(Index));
             }
 
