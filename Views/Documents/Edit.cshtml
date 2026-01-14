@@ -39,8 +39,12 @@
                 <span asp-validation-for="OperationDate" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="TotalValue" class="control-label"></label>
-                <input asp-for="TotalValue" type="number" class="form-control" readonly/>
+                <label asp-for="TotalNetAmount" class="control-label"></label>
+                <input asp-for="TotalNetAmount"  class="form-control" readonly/>
+            </div>
+            <div class="form-group">
+                <label asp-for="TotalGrossAmount" class="control-label"></label>
+                <input asp-for="TotalGrossAmount"  class="form-control" readonly />
             </div>
             <div class="form-group">
                 <label asp-for="Description" class="control-label"></label>

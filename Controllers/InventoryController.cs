@@ -30,9 +30,8 @@ namespace WmsCore.Controllers
             ViewData["PriceSortParm"] = sortOrder == "Price" ? "price_desc" : "Price";
             ViewData["CurrentFilter"] = searchString;
 
-            if (date == null) { 
-                date = DateTime.Today;
-            }
+            DateTime searchDate = date ?? DateTime.Now;
+
             if (searchString != null)
             {
                 pageNumber = 1;
@@ -49,7 +48,7 @@ namespace WmsCore.Controllers
 
             ViewData["CategoryList"] = new SelectList(categories, "CategoryId", "Name", categoryId);
             ViewData["CurrentCategory"] = categoryId; // by wiedzieć, która opcja ma być selected
-            ViewData["Date"] = date;
+            ViewData["Date"] = searchDate;
 
             IQueryable<Article> items = _context.Article
                                                 .Include(i => i.Category)
@@ -87,10 +86,11 @@ namespace WmsCore.Controllers
 
 
             //Rzutowanie listy towarów na listę ViewModel oraz obliczenie dla każdego artykułu ilości w magazynie
+            var nextDay = searchDate.Date.AddDays(1); //znajdzie wszystkie godziny do północy
             IQueryable<InventoryViewModel> inventories = items.Select(i => new InventoryViewModel()
             {
                 Article = i,
-                TotalQuantity = i.InventoryMovements.Where(m => m.EffectiveDate <= date).Sum(m => m.QuantityChange)
+                TotalQuantity = i.InventoryMovements.Where(m => m.EffectiveDate < nextDay).Sum(m => m.QuantityChange)
             });
 
             int pageSize = 10;

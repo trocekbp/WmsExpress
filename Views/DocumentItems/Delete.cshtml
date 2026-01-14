@@ -29,6 +29,18 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Article.Code)
         </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NetPrice)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NetPrice)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.GrossPrice)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.GrossPrice)
+        </dd>
         <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.Quantity)
         </dt>
@@ -46,6 +58,6 @@
     <form asp-action="Delete" asp-route-docID="@Model.DocumentId">
         <input type="hidden" value="@Model.DocumentId" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <a asp-action="Edit" asp-controller="Documents" asp-route-id="@Model.DocumentId">Back</a>
     </form>
 </div>

@@ -74,6 +74,9 @@
                         </button>
                     </th>
                     <th>
+                        @Html.DisplayNameFor(model => model.Articles[0].GrossPrice)
+                    </th>
+                    <th>
                         @Html.DisplayNameFor(model => model.Articles[0].EAN)
                     </th>
                     <th>
@@ -96,6 +99,9 @@
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.NetPrice)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.GrossPrice)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => item.EAN)

@@ -306,7 +306,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 NotifyError(ex.Message);
                 return RedirectToAction("Edit", "Documents", new { id = docID });
             };
-            NotifySuccess("Sukces");
+            NotifySuccess("");
             return RedirectToAction("Edit", "Documents", new { id = docID });
         }
         #region Aktualizacje stanów magazynowych
@@ -431,8 +431,8 @@ namespace Music_Store_Warehouse_App.Controllers
             {
                 _context.Add(new InventoryMovement()
                 {
-                    Article = documentItem.Article,
-                    Document = documentItem.Document,
+                    ArticleId = documentItem.ArticleId,
+                    DocumentId = documentItem.DocumentId,
                     QuantityChange = -documentItem.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu
                     EffectiveDate = DateTime.Now //Wpływ na magazyn 
                 });
@@ -441,8 +441,8 @@ namespace Music_Store_Warehouse_App.Controllers
             {
                 _context.Add(new InventoryMovement()
                 {
-                    Article = documentItem.Article,
-                    Document = documentItem.Document,
+                    ArticleId = documentItem.ArticleId,
+                    DocumentId = documentItem.DocumentId,
                     QuantityChange = documentItem.Quantity, // PLUS ILOŚĆ
                     EffectiveDate = DateTime.Now //Wpływ na magazyn 
                 });

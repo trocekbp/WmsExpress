@@ -59,16 +59,16 @@
     <thead>
         <tr>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["CodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Code</a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["CodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Kod</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Name</a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Nazwa</a>
             </th>
             <th>
-                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Price</a>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PriceSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">Cena netto</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model[0].Article.Description)
+                @Html.DisplayNameFor(model => model[0].Article.GrossPrice)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model[0].Article.EAN)
@@ -96,13 +96,13 @@
                     @Html.DisplayFor(modelArticle => vm.Article.NetPrice)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelArticle => vm.Article.Description)
+                    @Html.DisplayFor(modelArticle => vm.Article.GrossPrice)
                 </td>
                 <td>
                     @Html.DisplayFor(modelArticle => vm.Article.EAN)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelArticle => vm.Article.Category.CategoryId)
+                    @Html.DisplayFor(modelArticle => vm.Article.Category.Name)
                 </td>
                 <td class="@(vm.TotalQuantity > 0 ? "bg-success bg-opacity-10 text-success fw-semibold" : "")">
                     @vm.TotalQuantity

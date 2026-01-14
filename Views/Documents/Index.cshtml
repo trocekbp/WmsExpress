@@ -64,7 +64,10 @@
                 @Html.DisplayNameFor(model => model.OperationDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.TotalValue)
+                @Html.DisplayNameFor(model => model.TotalNetAmount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TotalGrossAmount)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Contractor)
@@ -91,7 +94,10 @@
                 @Html.DisplayFor(modelItem => item.OperationDate)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.TotalValue)
+                @Html.DisplayFor(modelItem => item.TotalNetAmount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TotalGrossAmount)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Contractor.Name)
