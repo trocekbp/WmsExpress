@@ -194,7 +194,7 @@ namespace Music_Store_Warehouse_App.Controllers
 
             //Dodanie pozycji dokumentu oraz wyliczenie wartości dokumentu
             _context.DocumentItem.AddRange(documentItems);
-            document.TotalValue = calculateTotalVal(documentItems);
+            document.TotalValue = CalculateTotalVal(documentItems);
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Details", "Documents", new { id = docId });

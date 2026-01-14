@@ -137,7 +137,7 @@ namespace Music_Store_Warehouse_App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("DocumentId,Type,Date,OperationDate,TotalValue,Description,ContractorId")] Document document)
+        public async Task<IActionResult> Edit(int id, [Bind("DocumentId,Number,Type,Date,OperationDate,TotalValue,Description,ContractorId")] Document document)
         {
             if (id != document.DocumentId)
             {
