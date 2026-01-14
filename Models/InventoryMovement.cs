@@ -13,7 +13,7 @@ namespace WmsCore.Models
 
         public int DocumentId { get; set; }
         public Document Document { get; set; }
-
+        [Column(TypeName = "decimal(18, 4)")]
         public decimal QuantityChange { get; set; } // + / -
 
         public DateTime EffectiveDate { get; set; } = DateTime.UtcNow;
