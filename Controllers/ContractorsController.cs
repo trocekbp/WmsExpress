@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using WmsCore.Controllers;
 using WmsCore.Data;
 using WmsCore.Models;
 
 namespace Music_Store_Warehouse_App.Controllers
 {
-    public class ContractorsController : Controller
+    public class ContractorsController : BaseController
     {
         private readonly WmsCoreContext _context;
 
@@ -34,6 +35,7 @@ namespace Music_Store_Warehouse_App.Controllers
             }
 
             var contractor = await _context.Contractor
+                .Include(i => i.Address)
                 .FirstOrDefaultAsync(m => m.ContractorId == id);
             if (contractor == null)
             {
@@ -76,7 +78,10 @@ namespace Music_Store_Warehouse_App.Controllers
                 return NotFound();
             }
 
-            var contractor = await _context.Contractor.FindAsync(id);
+            var contractor = await _context.Contractor
+                            .Include(i => i.Address)
+                            .FirstOrDefaultAsync(i => i.ContractorId == id);
+
             if (contractor == null)
             {
                 return NotFound();
@@ -89,7 +94,7 @@ namespace Music_Store_Warehouse_App.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ContractorId,Name,NIP,Email,IsContractor,IsCustomer")] Contractor contractor)
+        public async Task<IActionResult> Edit(int id, Contractor contractor)
         {
             if (id != contractor.ContractorId)
             {
@@ -128,6 +133,7 @@ namespace Music_Store_Warehouse_App.Controllers
             }
 
             var contractor = await _context.Contractor
+                .Include(i => i.Address)
                 .FirstOrDefaultAsync(m => m.ContractorId == id);
             if (contractor == null)
             {
@@ -142,14 +148,30 @@ namespace Music_Store_Warehouse_App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var contractor = await _context.Contractor.FindAsync(id);
+            var contractor = await _context.Contractor.Include(i => i.Address)
+                .FirstOrDefaultAsync(m => m.ContractorId == id);
+
             if (contractor != null)
             {
                 _context.Contractor.Remove(contractor);
             }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException != null && ex.InnerException.ToString().Contains("FK_Document_Contractor_ContractorId"))
+                {
+                    NotifyError("Kontrahent jest powiązany z dokumentami");
+                }
+                else
+                {
+                    NotifyError(ex.Message + "\n Inner Exception: \n" + ex.InnerException.ToString());
+                }
+                return View(contractor);
+            }
+        return RedirectToAction(nameof(Index));
         }
 
         private bool ContractorExists(int id)

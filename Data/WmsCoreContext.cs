@@ -39,7 +39,7 @@ namespace WmsCore.Data
                 .HasForeignKey(f => f.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //Relacja jeden do jednego Articleu oraz Encji zapasu w magazynie
+            //Relacja jeden do jednego Article oraz Encji zapasu w magazynie
             modelBuilder.Entity<Article>()
               .HasMany(i => i.InventoryMovements)
               .WithOne(ii => ii.Article)
@@ -62,7 +62,14 @@ namespace WmsCore.Data
                  .WithOne(i => i.Document)
                  .HasForeignKey(i => i.DocumentId)
                  .OnDelete(DeleteBehavior.Cascade);
-
+            //Konfiguracja blokowanie usunięcia kontrahenta który jest powiązany z dokumentami
+            //Konfiguracja od strony dziecka - dokument który posiada rodzica czyli kontrahenta
+            modelBuilder
+                .Entity<WmsCore.Models.Document>()
+                .HasOne(d => d.Contractor)
+                .WithMany(c => c.Documents)
+                .HasForeignKey(d => d.ContractorId)
+                .OnDelete(DeleteBehavior.Restrict);
             //konfiguracja pola Number
             modelBuilder.Entity<WmsCore.Models.Document>()
                 .Property(d => d.Number)

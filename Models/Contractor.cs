@@ -14,7 +14,7 @@ namespace WmsCore.Models
         [DisplayName("Nazwa")]
         public string Name { get; set; }
 
-        [RegularExpression(@"^\d{10}$|^$", ErrorMessage = "NIP musi być pusty lub mieć dokładnie 10 cyfr.")]
+        [RegularExpression(@"^\d{10}$|^$", ErrorMessage = "NIP musi być pusty lub musi mieć dokładnie 10 cyfr.")]
 
         public string? NIP { get; set; }
 
@@ -22,6 +22,7 @@ namespace WmsCore.Models
         [DisplayName("E-mail")]
         public string Email { get; set; }
 
+        [ValidateNever]
         public Address Address { get; set; }
 
         [DisplayName("Dostawca")]
