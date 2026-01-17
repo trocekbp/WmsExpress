@@ -1,0 +1,53 @@
+﻿@model IEnumerable<WmsCore.ViewModels.UsersViewModel>
+
+@{
+    ViewData["Title"] = "Operatorzy";
+}
+
+<h1>Operatorzy</h1>
+
+<p>
+    <a asp-action="Register">Utwórz nowego operatora</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Username)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Fullname)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Role)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => user.Username)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => user.Fullname)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => user.Email)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => user.Role)
+                </td>
+                <td>
+                    <a asp-action="ChangePassword" asp-route-username="@user.Username">Zmiana hasła</a> |
+                    <a asp-action="Delete" asp-route-username="@user.Username">Usuń</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -17,9 +17,10 @@ namespace WmsCore.Data
                 //Dodanie ról
                 await AddRoleAsync(roleManager, "Admin");
                 await AddRoleAsync(roleManager, "User");
+                await AddRoleAsync(roleManager, "Manager");
 
-                //Dodanie administratora
-                string adminLogin = "admin";
+            //Dodanie administratora
+            string adminLogin = "admin";
                 var adminUser = await userManager.FindByNameAsync(adminLogin);
                 if (adminUser == null) {
                     var newAdmin = new User

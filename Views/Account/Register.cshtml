@@ -16,6 +16,7 @@
                 <label asp-for="UserRole" class="form-label"></label>
                 <select asp-for="UserRole" class="form-select">
                     <option value="User">Domyślny operator</option>
+                    <option value="Manager">Kierownik</option>
                     <option value="Admin">Administrator</option>
                 </select>
                 <span asp-validation-for="UserRole" class="text-danger"></span>

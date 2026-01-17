@@ -46,3 +46,17 @@
         </div>
     </a>
 </div>
+@if (User.IsInRole("Admin"))
+{
+    <div class="row">
+        <div class="col-md-4"></div>
+
+        <a href="/Account/Users"
+        class="col-md-4 d-block text-dark text-decoration-none">
+            <div class="kafelek">
+                <h2>Operatorzy</h2>
+                <p>Konfiguracja i zarządzanie operatorami</p>
+            </div>
+        </a>
+    </div>
+}

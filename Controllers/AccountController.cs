@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using System.Diagnostics;
+using WmsCore.Data;
 using WmsCore.Models;
 using WmsCore.ViewModels;
 
 namespace WmsCore.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly SignInManager<User> signInManager;
         private readonly UserManager<User> userManager;
@@ -20,11 +23,37 @@ namespace WmsCore.Controllers
             this.roleManager = roleManager;
         }
 
+        //Get Account/Users
+        [HttpGet]
+        public async Task<IActionResult> Users() {
+            if (!User.IsInRole("Admin")) {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
+            var model = new List<UsersViewModel>();
+
+            var user_list = await userManager.Users.ToListAsync();
+
+            foreach (var user in user_list) {
+                var roles = await userManager.GetRolesAsync(user);
+                model.Add(new UsersViewModel
+                {
+                    Username = user.UserName,
+                    Fullname = user.FullName,
+                    Email = user.Email,
+                    Role = string.Join(",", roles)
+                });
+            }
+            return View(model);
+        }
+
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult Login() { 
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model) {
@@ -45,11 +74,21 @@ namespace WmsCore.Controllers
 
         [HttpGet]
         public IActionResult Register() {
+            if (!User.IsInRole("Admin"))
+            {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
             return View();
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model) {
+            if (!User.IsInRole("Admin"))
+            {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
             if (!ModelState.IsValid) { 
                 return View(model);
             }
@@ -71,7 +110,7 @@ namespace WmsCore.Controllers
 
             if (result.Succeeded) {
                 await userManager.AddToRoleAsync(user, model.UserRole);
-                return RedirectToAction("Index", "Home");
+                return RedirectToAction("Users", "Account");
             }
 
             foreach (var error in result.Errors) { 
@@ -83,6 +122,11 @@ namespace WmsCore.Controllers
         [HttpGet]
         public IActionResult ChangePassword(string username)
         {
+            if (!User.IsInRole("Admin"))
+            {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
             if (string.IsNullOrEmpty(username)){
                 // Tworzymy model błędu, żeby widok nie dostał NULL-a
                 var errorModel = new ErrorViewModel
@@ -98,6 +142,12 @@ namespace WmsCore.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model) {
+            if (!User.IsInRole("Admin"))
+            {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
+
             if (!ModelState.IsValid) {
                 ModelState.AddModelError(string.Empty, "Coś poszło nie tak");
                 return View(model);
@@ -116,7 +166,8 @@ namespace WmsCore.Controllers
             if (result.Succeeded)
             {
                 result = await userManager.AddPasswordAsync(user, model.NewPassword);
-                return RedirectToAction("Index", "Home");
+                NotifySuccess("Ustawiono nowe hasło");
+                return RedirectToAction("Users");
             }
             else
             {
@@ -127,6 +178,40 @@ namespace WmsCore.Controllers
                 return View(model);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> Delete(string username) {
+            if (!User.IsInRole("Admin"))
+            {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
+            var user = await userManager.FindByNameAsync(username);
+            if (user == null) {
+                NotifyError($"Nie można pobrać operatora o nazwie {username}");
+                return RedirectToAction("Users");
+            }
+            return View(user);
+        }
+
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string username)
+        {
+            if (!User.IsInRole("Admin"))
+            {
+                NotifyError("Brak uprawnień administratora.");
+                return RedirectToAction("Index", "Home");
+            }
+            var user = await userManager.FindByNameAsync(username);
+            if (user == null)
+            {
+                NotifyError($"Nie można pobrać operatora o nazwie {username}");
+                return RedirectToAction("Users");
+            }
+            await userManager.DeleteAsync(user);
+            return RedirectToAction("Users");
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -134,5 +219,6 @@ namespace WmsCore.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
+
     }
 }

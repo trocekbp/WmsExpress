@@ -10,8 +10,7 @@ namespace WmsCore.ViewModels
         public string FullName { get; set; }
 
         [EmailAddress]
-        [Required(ErrorMessage = "Email jest wymagany")]
-        public string Email { get; set; }
+        public string? Email { get; set; }
 
         [Display(Name = "Hasło")]
         [StringLength(40, MinimumLength = 8, ErrorMessage = "Hasło musi mieć minimalnie {2} znaków")]

@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using WmsCore.Controllers;
 using WmsCore.Data;
 using WmsCore.Definitions;
 using WmsCore.Models;
 
 namespace Music_Store_Warehouse_App.Controllers
 {
-    public class DocumentsController : Controller
+    public class DocumentsController : BaseController
     {
         private readonly WmsCoreContext _context;
 
@@ -112,6 +113,7 @@ namespace Music_Store_Warehouse_App.Controllers
         // GET: Documents/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+     
             if (id == null)
             {
                 return NotFound();

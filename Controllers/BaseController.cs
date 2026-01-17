@@ -16,5 +16,6 @@ namespace WmsCore.Controllers
             TempData["UserMessage"] = message;
             TempData["MessageType"] = "error"; // dla SweetAlert2
         }
+
     }
 }
