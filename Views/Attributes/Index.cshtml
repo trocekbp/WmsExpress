@@ -1,0 +1,34 @@
+﻿@using WmsCore.Data
+@model IEnumerable<Category>
+
+@{
+    ViewData["Title"] = "Index";
+    int currentID = (int?)ViewData["CurrentID"] ?? 0;
+}
+<h1>Atrybuty</h1>
+
+@foreach (var cat in Model)
+{
+    <div class="border-bottom p-2">
+
+        <button class="btn btn-primary @(cat.CategoryId == currentID ? "" : "collapsed")"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#szczegoly-@cat.CategoryId"
+                aria-expanded="@(cat.CategoryId == currentID ? "true" : "false")">
+            @cat.Name
+        </button>
+
+        <div class="collapse @(cat.CategoryId == currentID ? "show" : "")" id="szczegoly-@cat.CategoryId">
+            <div class="card card-body mt-2">
+                <ul>
+                @foreach (var attr in cat.AtrDefinitions)
+                {
+                        <li> @attr.Name </li>
+                }
+                </ul>
+            </div>
+        </div>
+
+    </div>
+}
