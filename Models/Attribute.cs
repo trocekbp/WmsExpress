@@ -14,9 +14,9 @@ namespace WmsCore.Models
 
         public int AtrDefinitionId { get; set; }
         [ValidateNever]
-        public AtrDefinition AtrDefinition { get; set; }
+        public AtrDefinition AtrDefinition { get; set; } = null!;
 
-        public string Value { get; set; } 
+        public string? Value { get; set; } 
 
     }
 

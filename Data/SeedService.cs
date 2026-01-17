@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using WmsCore.Models;
 
 namespace WmsCore.Data
@@ -18,6 +19,8 @@ namespace WmsCore.Data
                 await AddRoleAsync(roleManager, "Admin");
                 await AddRoleAsync(roleManager, "User");
                 await AddRoleAsync(roleManager, "Manager");
+                
+
 
             //Dodanie administratora
             string adminLogin = "admin";
@@ -39,7 +42,9 @@ namespace WmsCore.Data
                 }
 
                 }
-            }
+            //Seed domyślnej kategorii
+                await AddCategoryIfNotExistsAsync(context, "Inne");
+        }
 
         private static async Task AddRoleAsync(RoleManager<IdentityRole> roleManager, string roleName) {
             if (!await roleManager.RoleExistsAsync(roleName)) {
@@ -50,6 +55,23 @@ namespace WmsCore.Data
                 }
             }
         
+        }
+
+        private static async Task AddCategoryIfNotExistsAsync(WmsCoreContext context, string categoryName)
+        {
+            // Sprawdzamy czy kategoria o takiej nazwie już istnieje
+            var exists = await context.Category.AnyAsync(c => c.Name == categoryName);
+
+            if (!exists)
+            {
+                var category = new Category
+                {
+                    Name = categoryName,
+                };
+
+                await context.Category.AddAsync(category);
+                await context.SaveChangesAsync(); 
+            }
         }
     }
 }

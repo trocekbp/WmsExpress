@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using System;
@@ -38,6 +39,29 @@ namespace WmsCore.Data
                 .WithOne(f => f.Article)
                 .HasForeignKey(f => f.ArticleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            //Usnięcie definicji atrybutów przy usunięciu kategorii
+            modelBuilder
+                .Entity<AtrDefinition>()
+                .HasOne(a => a.Category)
+                .WithMany(c => c.AtrDefinitions)
+                .HasForeignKey(a => a.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+            //Usunięcie wartości atrybutów przy usunięciu definicji
+            modelBuilder
+                .Entity<WmsCore.Models.Attribute>()
+                .HasOne(a => a.AtrDefinition)
+                .WithMany(ad => ad.Attributes)
+                .HasForeignKey(a => a.AtrDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            //Blokada usunięcia kategorii gdy są w niej artykuły, najpierw trzba ustawić aktegorię artykułów na "inne"
+            modelBuilder
+                .Entity<Category>()
+                .HasMany(c => c.Articles)
+                .WithOne(a => a.Category)
+                .HasForeignKey(a => a.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             //Relacja jeden do jednego Article oraz Encji zapasu w magazynie
             modelBuilder.Entity<Article>()

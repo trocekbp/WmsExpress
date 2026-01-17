@@ -157,7 +157,7 @@ namespace Music_Store_Warehouse_App.Views
                     {
                         var type = cat.Name;
                         ViewBag.AttributesDefinitions = _context.AtrDefinition
-                            .Where(a => a.AttributeGroup.Name == type)
+                            .Where(a => a.CategoryId == cat.CategoryId)
                             .ToList();
                     }
                 }
@@ -181,7 +181,7 @@ namespace Music_Store_Warehouse_App.Views
                         var cat = _context.Category.Find(article.CategoryId);
                         var type = cat.Name;
                         ViewBag.AttributesDefinitions = _context.AtrDefinition
-                            .Where(a => a.AttributeGroup.Name == type)
+                            .Where(a => a.CategoryId == cat.CategoryId)
                             .ToList();
                     }
                     return View(article);
