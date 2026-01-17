@@ -417,7 +417,7 @@ namespace Music_Store_Warehouse_App.Controllers
             zatwierdza się za kilka dni */
             if (stock - documentItem.Quantity < 0)
             {
-                throw new InvalidOperationException("Nie można wykonać operacji, blokada przed stanem ujemnym");
+                throw new InvalidOperationException("Nie można wykonać operacji - blokada przed stanem ujemnym");
             }
 
             ApplyCorrection(documentItem);
@@ -433,7 +433,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 {
                     ArticleId = documentItem.ArticleId,
                     DocumentId = documentItem.DocumentId,
-                    QuantityChange = -documentItem.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu
+                    QuantityChange = documentItem.Quantity, // PLUS ILOŚĆ - dodajemy na stan ilość z usuniętego wydania
                     EffectiveDate = DateTime.Now //Wpływ na magazyn 
                 });
             }
@@ -443,7 +443,7 @@ namespace Music_Store_Warehouse_App.Controllers
                 {
                     ArticleId = documentItem.ArticleId,
                     DocumentId = documentItem.DocumentId,
-                    QuantityChange = documentItem.Quantity, // PLUS ILOŚĆ
+                    QuantityChange = -documentItem.Quantity, // MINUS ILOŚĆ - zdejmujemy ze stanu ilość przyjęcia
                     EffectiveDate = DateTime.Now //Wpływ na magazyn 
                 });
             }

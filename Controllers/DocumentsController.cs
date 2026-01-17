@@ -113,12 +113,10 @@ namespace Music_Store_Warehouse_App.Controllers
         // GET: Documents/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-     
             if (id == null)
             {
                 return NotFound();
             }
-
             var document = await _context.Document
                 .Include(d => d.Contractor)
                 .Include(d => d.DocumentItems)
@@ -130,6 +128,17 @@ namespace Music_Store_Warehouse_App.Controllers
             {
                 return NotFound();
             }
+
+            //Jeśli dokument jest zatwierdzony to może go zmienić tylko maganer lub administrator
+            if (document.OperationDate < DateTime.Now) //dokument zatwierdzony
+            {
+                if (!(User.IsInRole("Admin") || User.IsInRole("Manager"))){
+                    NotifyError("Zatwierdzone dokumenty może edytować tylko kierownik");
+
+                    return RedirectToAction("Details", "Documents", new { id = id });
+                }
+            }
+
             ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name", document.ContractorId);
             return View(document);
         }
@@ -144,6 +153,16 @@ namespace Music_Store_Warehouse_App.Controllers
             if (id != document.DocumentId)
             {
                 return NotFound();
+            }
+            //Jeśli dokument jest zatwierdzony to może go zmienić tylko maganer lub administrator
+            if (document.OperationDate < DateTime.Now) //dokument zatwierdzony
+            {
+                if (!(User.IsInRole("Admin") || User.IsInRole("Manager")))
+                {
+                    NotifyError("Zatwierdzone dokumenty może edytować tylko kierownik");
+
+                    return RedirectToAction("Details", "Documents", new { id = id });
+                }
             }
 
             if (ModelState.IsValid)
@@ -186,6 +205,16 @@ namespace Music_Store_Warehouse_App.Controllers
                 return NotFound();
             }
 
+            //Jeśli dokument jest zatwierdzony to może go usunąć tylko administrator
+            if (document.OperationDate < DateTime.Now) //dokument zatwierdzony
+            {
+                if (!User.IsInRole("Admin"))
+                {
+                    NotifyError("Zatwierdzone dokumenty może usunąć tylko administrator");
+                    return RedirectToAction("Details", "Documents", new { id = id });
+                }
+            }
+
             return View(document);
         }
 
@@ -197,6 +226,15 @@ namespace Music_Store_Warehouse_App.Controllers
             var document = await _context.Document.FindAsync(id);
             if (document != null)
             {
+                //Jeśli dokument jest zatwierdzony to może go usunąć tylko administrator
+                if (document.OperationDate < DateTime.Now) //dokument zatwierdzony
+                {
+                    if (!User.IsInRole("Admin"))
+                    {
+                        NotifyError("Zatwierdzone dokumenty może usunąć tylko administrator");
+                        return RedirectToAction("Details", "Documents", new { id = id });
+                    }
+                }
                 _context.Document.Remove(document);
             }
 
