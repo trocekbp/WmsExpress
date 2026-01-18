@@ -13,14 +13,59 @@ namespace WmsCore.Controllers
         }
         public async Task<IActionResult> Index(int? currentID)
         {
-            
+
             var model = await _context.Category
                 .Include(c => c.AtrDefinitions)
+                    .ThenInclude(d => d.Attributes)
                 .ToListAsync();
+
+            //Odfiltrowanie tylko unikalnych wartości
+            foreach (var category in model)
+            {
+                foreach (var definition in category.AtrDefinitions)
+                {
+                    definition.Attributes = definition.Attributes.DistinctBy(a => a.Value)
+                        .ToList();
+                }
+            }
+
 
             //Current selected category id
             ViewData["CurrentID"] = currentID;
             return View(model);
         }
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) {
+                return NotFound();
+            }
+
+            var model = await _context.AtrDefinition
+                .Include(i => i.Category)
+                .FirstOrDefaultAsync(i => i.AtrDefinitionId == id);
+
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, AtrDefinition atrDefinition)
+        {
+            if (id != atrDefinition.AtrDefinitionId)
+            {
+                return NotFound();
+            }
+            if (ModelState.IsValid) {
+                _context.Update(atrDefinition);
+                await _context.SaveChangesAsync();
+
+
+                return RedirectToAction("Index", new { currentID = atrDefinition.CategoryId});
+            }
+            return View(atrDefinition);
+        }
+
     }
 }
+

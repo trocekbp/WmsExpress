@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using System.ComponentModel;
 
 namespace WmsCore.Models
 {
@@ -9,7 +10,11 @@ namespace WmsCore.Models
         public string Name { get; set; }
 
         public int CategoryId { get; set; }
-        public Category Category { get; set; } = null!;      
+
+        [ValidateNever]
+        public Category Category { get; set; }
+
+        [ValidateNever]
         public ICollection<Attribute> Attributes { get; set; }
     }
 }

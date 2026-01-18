@@ -58,3 +58,65 @@ input[readonly], textarea[readonly] {
     cursor: not-allowed; 
     opacity: 0.7; 
 }
+.kapsulka-hover {
+    transition: all 0.2s ease-in-out; 
+    border-left: 5px solid transparent; 
+}
+
+    .kapsulka-hover:hover {
+        transform: translateY(-3px); 
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+        border-color: #0d6efd !important; 
+        border-left: 5px solid #0d6efd; 
+    }
+
+.btn-delete {
+    /* 1. Rozmiar i kszta³t (ma³y, 25px) */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    /* 2. Wygl¹d podstawowy */
+    background-color: #ff4d4d; /* Czerwony */
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2); /* Lekki cieñ */
+    position: relative;
+    /* 3. P³ynna animacja obrotu i koloru */
+    transition: transform 0.3s ease, background-color 0.2s ease;
+}
+
+    /* Rysowanie Iksa */
+    .btn-delete::before,
+    .btn-delete::after {
+        content: '';
+        position: absolute;
+        width: 12px; /* Szerokoœæ ramion X */
+        height: 2px; /* Gruboœæ ramion X */
+        background-color: white;
+        border-radius: 1px;
+    }
+
+    .btn-delete::before {
+        transform: rotate(45deg);
+    }
+
+    .btn-delete::after {
+        transform: rotate(-45deg);
+    }
+
+    /* --- INTERAKCJE --- */
+
+    /* Po najechaniu: Obrót o 90st i ciemniejszy kolor */
+    .btn-delete:hover {
+        background-color: #e60000;
+        transform: rotate(90deg);
+    }
+
+    /* Po klikniêciu: "Odkrêcenie" do 0st i bardzo ciemny kolor */
+    .btn-delete:active {
+        background-color: #b30000;
+        transform: rotate(0deg);
+        transition: transform 0.1s ease; /* Szybsza reakcja na klikniêcie */
+    }
