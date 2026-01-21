@@ -19,17 +19,6 @@ namespace WmsCore.Controllers
                     .ThenInclude(d => d.Attributes)
                 .ToListAsync();
 
-            //Odfiltrowanie tylko unikalnych wartości
-            foreach (var category in model)
-            {
-                foreach (var definition in category.AtrDefinitions)
-                {
-                    definition.Attributes = definition.Attributes.DistinctBy(a => a.Value)
-                        .ToList();
-                }
-            }
-
-
             //Current selected category id
             ViewData["CurrentID"] = currentID;
             return View(model);
