@@ -135,7 +135,7 @@ namespace Music_Store_Warehouse_App.Views
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId")] Article article, string action,  // "ShowAttributess" lub "SaveInstrument"
+        public async Task<IActionResult> Create([Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId, Attributes")] Article article, string action,  // "ShowAttributess" lub "SaveInstrument"
             [FromForm] IList<WmsCore.Models.Attribute> Attributes)
         {
             // Zawsze przygotowujemy ViewBag dropdownów, bo widok ich potrzebuje
@@ -152,13 +152,34 @@ namespace Music_Store_Warehouse_App.Views
                 else
                 {
                     // Jeżeli jest wartość CategoryId, ładujemy od razu cechy dla danej grupy towarów
-                    var cat = _context.Category.Find(article.CategoryId);
-                    if (cat != null)
+                    var category = _context.Category.Find(article.CategoryId);
+                    if (category != null)
                     {
-                        var type = cat.Name;
-                        ViewBag.AttributesDefinitions = _context.AtrDefinition
-                            .Where(a => a.CategoryId == cat.CategoryId)
-                            .ToList();
+
+                        if (category.Name.Equals("Inne", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Nie obsługujemy atrybutów dla kategorii "Inne"
+                            NotifyError("Domyślna kategoria 'Inne' nie posiada definicji atrybutów. Zmień kategorię");
+                            return View(article);
+                        }
+
+                        var attrDefinitions = await _context.AtrDefinition
+                            .Where(i => i.CategoryId == category.CategoryId)
+                            .ToListAsync();
+
+                        //Dodajemy puste atrybuty do wypełnienia w modelu
+
+                        foreach (var definition in attrDefinitions)
+                        {
+                            article.Attributes.Add(new WmsCore.Models.Attribute
+                            {
+                                ArticleId = article.ArticleId,
+                                Article = article,
+                                AtrDefinitionId = definition.AtrDefinitionId,
+                                AtrDefinition = definition
+                            });
+                        }
+                      
                     }
                 }
 
@@ -241,7 +262,7 @@ namespace Music_Store_Warehouse_App.Views
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId")] Article article)
+        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId, Attributes")] Article article)
         {
             if (id != article.ArticleId)
             {

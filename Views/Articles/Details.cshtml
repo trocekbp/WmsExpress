@@ -4,12 +4,13 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h1>Szczegóły</h1>
 
 <div>
-    <h4>Item</h4>
+    <h4>Artykuł</h4>
     <hr />
-    <dl class="row">
+    <div class="row">
+    <dl class="col-9">
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Code)
         </dt>
@@ -65,6 +66,35 @@
             @Html.DisplayFor(model => model.Category.Name)
         </dd>
     </dl>
+    <div class="col-3">
+            @if (Model != null && Model.Attributes != null && Model.Attributes.Count > 0)
+            {
+                <h3>Atrybuty</h3>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Definicja</th>
+                            <th>Wartość</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Attributes.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @Model.Attributes[i].AtrDefinition.Name
+                                </td>
+                                <td>
+                                    @Model.Attributes[i].Value
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            }
+        </div>
+    </div>
 </div>
 <div>
     <a asp-action="Edit" asp-route-id="@Model?.ArticleId">Edit</a> |

@@ -53,7 +53,7 @@ namespace WmsCore.Models
         public Category Category { get; set; }
 
         // Nawigacja do przypisanych cech
-        public ICollection<Attribute>? Attributes { get; set; }
+        public List<Attribute> Attributes { get; set; } = new List<Attribute>();
 
         //Nawigacja do stanów na magazynie
         [ValidateNever]
