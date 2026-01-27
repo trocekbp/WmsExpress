@@ -8,7 +8,7 @@
 
 <p>
 <p>Dodaj towar</p>
-<a asp-action="Create" class="btn btn-sm btn-success">Dodaj</a>
+<a asp-action="Create" class="btn-details btn-add">Dodaj</a>
 </p>
 
 <form asp-action="Index" method="get" class="form-inline mb-3">
@@ -99,9 +99,9 @@
                     @Html.DisplayFor(modelItem => item.Category.Name)
                 </td>
                 <td>
-                    <a asp-action="Edit" asp-route-id="@item.ArticleId">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.ArticleId">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.ArticleId">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.ArticleId" class="btn-details btn-edit">Edycja</a>
+                    <a asp-action="Details" asp-route-id="@item.ArticleId" class="btn-details">Szczegóły</a>
+                    <a asp-action="Delete" asp-route-id="@item.ArticleId" class="btn-small-delete"></a>
                 </td>
             </tr>
         }

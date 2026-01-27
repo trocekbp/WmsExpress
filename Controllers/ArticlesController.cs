@@ -253,10 +253,16 @@ namespace Music_Store_Warehouse_App.Views
                 .Include(i => i.InventoryMovements)
                 .FirstOrDefaultAsync(i => i.ArticleId == id);
 
+            //Odfiltrowanie tylko aktywnych atrybutów.
+            if(item.Attributes.Any())
+                item.Attributes = item.Attributes.Where(a => a.AtrDefinition.CategoryId == item.CategoryId).ToList();
+            
             if (item == null)
             {
                 return NotFound();
             }
+
+
 
             PrepareViewBags();
             return View(item);
@@ -267,12 +273,80 @@ namespace Music_Store_Warehouse_App.Views
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId, Attributes")] Article article)
+        public async Task<IActionResult> Edit(int id, [Bind("ArticleId,Code,Name,NetPrice,GrossPrice,VatRate,Unit,Description,EAN,CategoryId, Attributes, InventoryMovements")] Article article, string action)
         {
             if (id != article.ArticleId)
             {
                 return NotFound();
             }
+
+            if (action == "ShowAttributes")
+            {
+                ViewBag.VatRates = new SelectList(VatRates.GetSymbols());
+                ViewBag.Units = new SelectList(Units.GetAllUnits());
+                ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "Name", article.CategoryId);
+
+                // Upewnijmy się, że wybrano kategorię
+                if (article.CategoryId == 0)
+                {
+                    ModelState.AddModelError(nameof(article.CategoryId), "Kategoria jest wymagana, aby wyświetlić cechy.");
+                }
+                else
+                {
+                    // Jeżeli jest wartość CategoryId, ładujemy od razu cechy dla danej grupy towarów
+                    var category = _context.Category.Find(article.CategoryId);
+                    if (category != null)
+                    {
+                        article.Attributes = new List<WmsCore.Models.Attribute>();
+
+                        if (category.Name.Equals("Inne", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Nie obsługujemy atrybutów dla kategorii "Inne"
+                            NotifyError("Domyślna kategoria 'Inne' nie posiada definicji atrybutów. Zmień kategorię");
+                            article.InventoryMovements = await _context.InventoryMovement.Where(i => i.ArticleId == article.ArticleId).ToListAsync();
+                            return View(article);
+                        }
+
+                        var attrDefinitions = await _context.AtrDefinition
+                            .Where(i => i.CategoryId == category.CategoryId)
+                            .ToListAsync();
+
+                        if (!attrDefinitions.Any())
+                        {
+                            NotifyError("Podana kategoria nie posiada żadnych atrybutów. Dodaj ich definicje w zakłądce \"Atrybuty\"");
+                            article.InventoryMovements = await _context.InventoryMovement.Where(i => i.ArticleId == article.ArticleId).ToListAsync();
+                            return View(article);
+                        }
+                        //Dodajemy puste atrybuty do wypełnienia w modelu
+                        var attributes = await _context.Attribute.Where(a => a.ArticleId == article.ArticleId 
+                        && attrDefinitions.Select(d => d.AtrDefinitionId).Contains(a.AtrDefinitionId))
+                            .Include(i => i.AtrDefinition)
+                            .ToListAsync();
+
+                        if (attributes.Any())
+                        {
+                            article.Attributes = attributes;
+                        }
+                        else {
+                            foreach (var definition in attrDefinitions)
+                            {
+                                article.Attributes.Add(new WmsCore.Models.Attribute
+                                {
+                                    ArticleId = article.ArticleId,
+                                    Article = article,
+                                    AtrDefinitionId = definition.AtrDefinitionId,
+                                    AtrDefinition = definition
+                                });
+                            }
+                        }
+
+                            article.InventoryMovements = await _context.InventoryMovement.Where(i => i.ArticleId == article.ArticleId).ToListAsync();
+                    }
+                }
+
+                return View(article);
+            }
+
 
             if (ModelState.IsValid)
             {
@@ -302,9 +376,11 @@ namespace Music_Store_Warehouse_App.Views
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+
             ViewBag.VatRates = new SelectList(VatRates.GetSymbols());
             ViewBag.Units = new SelectList(Units.GetAllUnits());
-            ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "CategoryId", article.CategoryId);
+            ViewBag.CategoryIds = new SelectList(_context.Category, "CategoryId", "Name", article.CategoryId);
             return View(article);
         }
 

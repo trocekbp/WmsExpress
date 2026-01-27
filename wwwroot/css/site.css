@@ -70,9 +70,9 @@ input[readonly], textarea[readonly] {
         border-left: 5px solid #0d6efd; 
     }
 
-.btn-delete {
+.btn-small-delete {
     /* 1. Rozmiar i kszta³t (ma³y, 25px) */
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
     width: 25px;
@@ -88,8 +88,8 @@ input[readonly], textarea[readonly] {
 }
 
     /* Rysowanie Iksa */
-    .btn-delete::before,
-    .btn-delete::after {
+    .btn-small-delete::before,
+    .btn-small-delete::after {
         content: '';
         position: absolute;
         width: 12px; /* Szerokoœæ ramion X */
@@ -98,25 +98,144 @@ input[readonly], textarea[readonly] {
         border-radius: 1px;
     }
 
-    .btn-delete::before {
+    .btn-small-delete::before {
         transform: rotate(45deg);
     }
 
-    .btn-delete::after {
+    .btn-small-delete::after {
         transform: rotate(-45deg);
     }
 
     /* --- INTERAKCJE --- */
 
     /* Po najechaniu: Obrót o 90st i ciemniejszy kolor */
-    .btn-delete:hover {
+    .btn-small-delete:hover {
         background-color: #e60000;
         transform: rotate(90deg);
     }
 
     /* Po klikniêciu: "Odkrêcenie" do 0st i bardzo ciemny kolor */
-    .btn-delete:active {
+    .btn-small-delete:active {
         background-color: #b30000;
         transform: rotate(0deg);
         transition: transform 0.1s ease; /* Szybsza reakcja na klikniêcie */
+    }
+
+
+/*Przyciski crud*/
+.btn-details {
+    /* Jasny, nasycony niebieski z "pêkniêciem" gradientu w po³owie */
+    background: linear-gradient(180deg, #46ccff 0%, #2095ff 50%, #007cf0 51%, #005fbc 100%);
+    color: white;
+    font-family: 'Arial Rounded MT Bold', 'Helvetica', sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 8px;
+    border-radius: 12px; /* Bardziej zaokr¹glony */
+    /* WyraŸna, ciemniejsza ramka w stylu komiksowym */
+    border: 3px solid #003d7a;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    transition: all 0.15s ease-in-out;
+    /* Gruby cieñ pod spodem daj¹cy efekt 3D */
+    box-shadow: 0 5px 0 #003d7a, 0 8px 15px rgba(0, 0, 0, 0.2);
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    outline: none;
+    text-decoration: none;
+}
+
+    /* Jasne odbicie œwiat³a na górze (efekt po³ysku) */
+    .btn-details::before {
+        content: "";
+        position: absolute;
+        top: 2px;
+        left: 10%;
+        width: 80%;
+        height: 35%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.1) 100%);
+        border-radius: 10px 10px 50% 50%;
+        pointer-events: none;
+    }
+
+    .btn-details:hover {
+        filter: brightness(1.1);
+        transform: translateY(-2px);
+        box-shadow: 0 7px 0 #003d7a, 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-details:active {
+        /* Przycisk siê "zapada" po klikniêciu */
+        transform: translateY(3px);
+        box-shadow: 0 2px 0 #003d7a, 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+/* EDYCJA - ¯Ó£TY */
+.btn-edit {
+    background: linear-gradient(180deg, #ffdb46 0%, #ffb720 50%, #f0a000 51%, #bc7d00 100%);
+    border-color: #7a5100;
+    box-shadow: 0 5px 0 #7a5100, 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+    .btn-edit:hover {
+        box-shadow: 0 7px 0 #7a5100, 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-edit:active {
+        box-shadow: 0 2px 0 #7a5100, 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+/* USUWANIE - CZERWONY */
+.btn-delete {
+    background: linear-gradient(180deg, #ff6b6b 0%, #ff3b3b 50%, #f00000 51%, #bc0000 100%);
+    border-color: #7a0000;
+    box-shadow: 0 5px 0 #7a0000, 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+    .btn-delete:hover {
+        box-shadow: 0 7px 0 #7a0000, 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-delete:active {
+        box-shadow: 0 2px 0 #7a0000, 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+/* DODAWANIE - ZIELONY */
+.btn-add {
+    background: linear-gradient(180deg, #4ed34e 0%, #28b828 50%, #1a9e1a 51%, #0e7a0e 100%);
+    border-color: #065006;
+    box-shadow: 0 5px 0 #065006, 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+    /* Usuwamy standardowy po³ysk przed nadpisaniem */
+    .btn-add::before {
+        content: "";
+        position: absolute;
+        top: -100%;
+        left: -100%;
+        width: 50px; /* W¹ski pasek œwiat³a */
+        height: 300%;
+        background: rgba(255, 255, 255, 0.4);
+        transform: rotate(35deg);
+        transition: all 0.5s;
+        border-radius: 0;
+        filter: blur(5px); /* Rozmycie krawêdzi œwiat³a */
+        pointer-events: none;
+    }
+
+    .btn-add:hover::before {
+        left: 150%; /* Pasek przelatuje przez ca³y przycisk przy hoverze */
+    }
+
+    .btn-add:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 7px 0 #065006, 0 10px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .btn-add:active {
+        transform: translateY(3px);
+        box-shadow: 0 2px 0 #065006, 0 4px 6px rgba(0, 0, 0, 0.2);
     }

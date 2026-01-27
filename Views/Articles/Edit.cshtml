@@ -1,8 +1,6 @@
 ﻿@model WmsCore.Models.Article
 
 @{
-
-    
     ViewData["Title"] = "Edit";
     //Jeśli istnieją ruchy magazynowe dla danego artykułu, nie można zmienić jednostki miary.
     var movement = Model.InventoryMovements.FirstOrDefault();
@@ -12,9 +10,9 @@
 
 <h4>Item</h4>
 <hr />
+<form asp-action="Edit">
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
             <input type="hidden" asp-for="ArticleId" />
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
@@ -71,12 +69,54 @@
                 <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryIds"></select>
             </div>
             <div class="form-group mt-4">
+                <input type="submit" name="action" value="ShowAttributes" class="btn btn-primary" />
+            </div>
+            <div class="form-group mt-4">
                 <input type="submit" name="action" value="Save" class="btn btn-primary" />
             </div>
-        </form>
-    </div>
-</div>
 
+    </div>
+        <div class="col-md-2">
+            <!-- spacer -->
+        </div>
+        <div class="col-md-6">
+            @if (Model != null && Model.Attributes != null && Model.Attributes.Count > 0)
+            {
+                <h3>Atrybuty</h3>
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Definicja</th>
+                            <th>Wartość</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.Attributes.Count; i++)
+                        {
+                            <tr>
+                                <td>
+                                    @Model.Attributes[i].AtrDefinition.Name
+                                </td>
+                                <td>
+                                    <div class="form-group">
+                                        <input type="hidden" asp-for="Attributes[i].AttributeId" />
+                                        <input type="hidden" asp-for="Attributes[i].ArticleId" />
+                                        <input type="hidden" asp-for="Attributes[i].AtrDefinitionId" />
+
+                                        <input asp-for="Attributes[i].Value" class="form-control" />
+                                        <span asp-validation-for="Attributes[i].Value" class="text-danger"></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+
+                </table>
+            }
+        </div>
+
+    </div>
+</form>
 <div>
     <a asp-action="Index">Back to List</a>
 </div>
