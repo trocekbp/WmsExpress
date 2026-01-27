@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using WmsCore.Models;
+using WmsCore.ViewModels;
 
 namespace Music_Store_Warehouse_App.Controllers;
 

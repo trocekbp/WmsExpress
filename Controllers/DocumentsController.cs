@@ -57,7 +57,8 @@ namespace Music_Store_Warehouse_App.Controllers
         {
             if (type == null)
             {
-                throw new InvalidOperationException("Nie przekazano typu dokumentu");
+                NotifyError("Nie przekazano typu dokumentu");
+                return RedirectToAction("Index");
 
             }
 
@@ -75,7 +76,7 @@ namespace Music_Store_Warehouse_App.Controllers
             }
 
                
-            ViewBag.Type = type;
+            ViewBag.Type = type; 
             var document = new Document(); //inicjalizacja i przekazanie daty wystawienia
             return View(document);
         }
@@ -90,7 +91,19 @@ namespace Music_Store_Warehouse_App.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.Type = document.Type;
-                ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name", document.ContractorId);
+                //Podział ze względu na dostawców i odbiorców
+                if (document.Type == DocumentTypes.PZ || document.Type == DocumentTypes.PW)
+                {
+                    ViewData["ContractorId"] = new SelectList(_context.Contractor.Where(i => i.IsContractor), "ContractorId", "Name");
+                }
+                else if (document.Type == DocumentTypes.WZ || document.Type == DocumentTypes.RW)
+                {
+                    ViewData["ContractorId"] = new SelectList(_context.Contractor.Where(i => i.IsCustomer), "ContractorId", "Name");
+                }
+                else
+                {
+                    ViewData["ContractorId"] = new SelectList(_context.Contractor, "ContractorId", "Name");
+                }
                 return View(document);
             }
             try

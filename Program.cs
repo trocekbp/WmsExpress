@@ -17,7 +17,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireLowercase = false;     // Nie wymagaj ma³ej litery
     options.Password.RequireUppercase = false;     // Nie wymagaj du¿ej litery
     options.Password.RequireNonAlphanumeric = false; // Nie wymagaj znaku specjalnego 
-    options.Password.RequiredLength = 3;           // Minimalna d³ugoœæ (domyœlnie jest 6)
+    options.Password.RequiredLength = 8;           // Minimalna d³ugoœæ has³a
 })
     .AddEntityFrameworkStores<WmsCoreContext>()
     .AddDefaultTokenProviders();
@@ -29,7 +29,6 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
-// 4. Konfiguracja œcie¿ek (Gdzie kierowaæ jak brak dostêpu)
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";

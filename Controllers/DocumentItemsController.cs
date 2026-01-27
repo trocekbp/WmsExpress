@@ -126,7 +126,7 @@ namespace Music_Store_Warehouse_App.Controllers
         {
             if (vm.SelectedArticles == null || !vm.SelectedArticles.Any())
             {
-                TempData["ErrorMessage"] = "Musisz zaznaczyć przynajmniej jedną pozycję.";
+                NotifyError("Musisz zaznaczyć przynajmniej jedną pozycję.");
                 return RedirectToAction("Index", new
                 {
                     DocumentId = vm.DocumentId,
@@ -161,7 +161,8 @@ namespace Music_Store_Warehouse_App.Controllers
             .Include(i => i.Category)
             .ToList();
 
-            //przypisanie obiektów w liście documentsItem na podstawie ich ID ponieważ wysłane żądanie zawiera samo ID bez encji
+            //przypisanie obiektów w liście documentsItem
+            //na podstawie ich ID ponieważ wysłane żądanie zawiera samo ID bez encji
             foreach (var di in documentItems)
             {
                 di.Article = itemsFromDb.First(i => i.ArticleId == di.ArticleId);
@@ -193,6 +194,7 @@ namespace Music_Store_Warehouse_App.Controllers
 
 
             //Dodanie pozycji dokumentu oraz wyliczenie wartości dokumentu
+
             _context.DocumentItem.AddRange(documentItems);
             document.TotalNetAmount = CalculateTotalNetValue(documentItems);
             document.TotalGrossAmount = CalculateTotalGrossValue(documentItems);
@@ -282,7 +284,7 @@ namespace Music_Store_Warehouse_App.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id, int docID)
         {
-            var documentItem = await _context.DocumentItem.Include(i => i.Document).FirstOrDefaultAsync();
+            var documentItem = await _context.DocumentItem.Include(i => i.Document).FirstOrDefaultAsync(i => i.DocumentItemId == id);
             if (documentItem == null)
             {
                 NotifyError("Nie udało się pobrać pozycji.");
@@ -292,7 +294,7 @@ namespace Music_Store_Warehouse_App.Controllers
             var document = documentItem.Document;
             try
             {
-                await CorrectInventory(documentItem);
+                await CorrectInventory(documentItem, document.Type);
                 //Po pomyślnej korekcji stanów wiemy że ta ilość nie będzie zerowa
                 document.TotalNetAmount -= documentItem.Quantity * documentItem.NetPrice;
                 document.TotalGrossAmount -= documentItem.Quantity * documentItem.GrossPrice;
@@ -366,7 +368,6 @@ namespace Music_Store_Warehouse_App.Controllers
         {
             //Wszystkie operacje magazynowe przed do dnia zaksięgowania dokumentu tak aby wiedzieć czy towary na pewno będą na stanie
             var grouped_mvm = movements
-                        .Where(x => x.EffectiveDate <= document.OperationDate)
                         .GroupBy(x => x.ArticleId)
                         .Select(group => new
                         {
@@ -404,7 +405,7 @@ namespace Music_Store_Warehouse_App.Controllers
         #region Aktualizacje stanów przy usunięciu pozycji dokumentu
         //Wprowadzamy korygujący ruch magazynowy
         //Nie dopuszczamy stanów ujemnych
-        private async Task CorrectInventory(DocumentItem documentItem)
+        private async Task CorrectInventory(DocumentItem documentItem, DocumentTypes type)
         {
 
             //Pobranie istniejących zapisów stanów danej pozycji
@@ -415,9 +416,12 @@ namespace Music_Store_Warehouse_App.Controllers
             /*Sprawdzamy zatwierdzone i niezatwierdzone ruchy magazynowe czyli bez warunku   .Where(x => x.EffectiveDate <= DateTime.Now()).
             ponieważ pozwala to uniknąc rozjechania się stanów w przyszłości, pozycje usuwamy teraz a kolejny dokument
             zatwierdza się za kilka dni */
-            if (stock - documentItem.Quantity < 0)
-            {
-                throw new InvalidOperationException("Nie można wykonać operacji - blokada przed stanem ujemnym");
+            if (type == DocumentTypes.PW || type == DocumentTypes.PZ) {
+                //czy korekta przyjęcia nie spowoduje stanu ujemnego
+                if (stock - documentItem.Quantity < 0)
+                {
+                    throw new InvalidOperationException("Nie można wykonać operacji - blokada przed stanem ujemnym");
+                }
             }
 
             ApplyCorrection(documentItem);

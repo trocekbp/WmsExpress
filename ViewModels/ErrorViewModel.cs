@@ -1,4 +1,4 @@
-namespace WmsCore.Models
+namespace WmsCore.ViewModels
 {
     public class ErrorViewModel
     {

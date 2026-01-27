@@ -34,6 +34,33 @@ namespace WmsCore.Controllers
             ViewData["CurrentID"] = currentID;
             return View(model);
         }
+        public IActionResult Create(int? currentID)
+        {
+            if (currentID == null) {
+                return NotFound();
+            }
+            //przekazanie id kategorii do widoku
+            var model = new AtrDefinition()
+            {
+                CategoryId = currentID.Value
+            };
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(AtrDefinition atrDefinition)
+        {
+            if (ModelState.IsValid)
+            {
+                _context.Add(atrDefinition);
+                await _context.SaveChangesAsync();
+
+
+                return RedirectToAction("Index", new { currentID = atrDefinition.CategoryId });
+            }
+            return View(atrDefinition);
+        }
 
         public async Task<IActionResult> Edit(int? id)
         {
@@ -64,6 +91,45 @@ namespace WmsCore.Controllers
                 return RedirectToAction("Index", new { currentID = atrDefinition.CategoryId});
             }
             return View(atrDefinition);
+        }
+
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var model = await _context.AtrDefinition.FindAsync(id);
+            if (model == null)
+            {
+                return NotFound();
+            }
+
+            return View(model);
+        }
+
+        // POST: Attributes/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            var definition = await _context.AtrDefinition.FindAsync(id);
+            if (definition != null)
+            {
+                _context.AtrDefinition.Remove(definition);
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex) {
+
+                NotifyError(ex.Message + "\n Inner Exception: \n" + ex.InnerException.ToString());
+
+                return View(definition);
+            }
+            return RedirectToAction(nameof(Index));
         }
 
     }

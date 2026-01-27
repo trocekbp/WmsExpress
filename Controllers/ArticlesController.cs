@@ -155,6 +155,7 @@ namespace Music_Store_Warehouse_App.Views
                     var category = _context.Category.Find(article.CategoryId);
                     if (category != null)
                     {
+                        article.Attributes = new List<WmsCore.Models.Attribute>();
 
                         if (category.Name.Equals("Inne", StringComparison.OrdinalIgnoreCase))
                         {
@@ -167,6 +168,10 @@ namespace Music_Store_Warehouse_App.Views
                             .Where(i => i.CategoryId == category.CategoryId)
                             .ToListAsync();
 
+                        if (!attrDefinitions.Any()) {
+                            NotifyError("Podana kategoria nie posiada żadnych atrybutów. Dodaj ich definicje w zakłądce \"Atrybuty\"");
+                            return View(article);
+                        }
                         //Dodajemy puste atrybuty do wypełnienia w modelu
 
                         foreach (var definition in attrDefinitions)
@@ -205,7 +210,7 @@ namespace Music_Store_Warehouse_App.Views
                             .Where(a => a.CategoryId == cat.CategoryId)
                             .ToList();
                     }
-                    return View(article);
+                        return View(article);
                 }
 
                 //Obliczenie brutto po stronie kontrolera
